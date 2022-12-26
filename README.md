@@ -25,7 +25,7 @@
 
 ## Installation
 
-Download the lasted version for your distribution from <a href="releases">the Releases.</a>
+Download the lasted version for your distribution from <a href="https://github.com/Ooggle/FlipperAnimationManager/releases">the Releases.</a>
 
 <br>
 
@@ -68,7 +68,7 @@ Select the Release configuration and build the project, the output binary will b
 
 <br>
 
-Note: You will have to get a copy of `SDL2.dll` from the <a href="https://github.com/libsdl-org/SDL/releases" target="_blank">SDL repository</a> and have it alongside the .exe in order to run the application. 
+Note: You will have to get a copy of `SDL2.dll` from the <a href="https://github.com/libsdl-org/SDL/releases">SDL repository</a> and have it alongside the .exe in order to run the application. 
 
 <br>
 
@@ -90,3 +90,9 @@ make
 ```
 
 The binary will be located in `build` folder.
+
+<br>
+
+## Contributing
+
+Pull requests are welcome. Feel free to open an issue if you want to request/discuss other features.
