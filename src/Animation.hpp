@@ -36,8 +36,11 @@ class Animation
     public:
         Animation(std::string anim_folder);
         ~Animation();
-        GLuint get_frame();
         bool is_valid();
+        GLuint get_frame();
+        int get_current_frame_number();
+        int get_total_frames_number();
+        int get_total_frames_files();
 };
 
 #endif

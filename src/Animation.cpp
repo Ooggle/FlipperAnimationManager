@@ -260,3 +260,18 @@ bool Animation::is_valid()
 {
     return this->valid_animation;
 }
+
+int Animation::get_current_frame_number()
+{
+    return this->current_frame_number;
+}
+
+int Animation::get_total_frames_number()
+{
+    return this->total_frames_number;
+}
+
+int Animation::get_total_frames_files()
+{
+    return this->total_frames_files;
+}

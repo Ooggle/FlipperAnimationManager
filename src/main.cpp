@@ -28,7 +28,7 @@ bool LoadTextureFromFileCustom(const char* filename, GLuint* out_texture, int* o
 {
     // Load from file
     FILE *f = stbi__fopen(filename, "rb");
-    if (!f) printf("Failed opening file\n");
+    if(!f) printf("Failed opening file\n");
     fseek(f, 0, SEEK_END);
     int len = ftell(f);
     //printf("Size: %d\n", len);
@@ -122,7 +122,7 @@ bool LoadTextureFromFileCustom(const char* filename, GLuint* out_texture, int* o
 
         // what was I trying to do making a png from scratch??
         /* f = stbi__fopen("./tiny.png", "wb");
-        if (!f) printf("Failed opening file\n");
+        if(!f) printf("Failed opening file\n");
         fprintf(f, "\x89PNG\r\n\x1a\n");
         fprintf(f, "%c%c%c\x0D", 0, 0, 0);
         fprintf(f, "IHDR");
@@ -162,7 +162,7 @@ bool LoadTextureFromFileCustom(const char* filename, GLuint* out_texture, int* o
     int image_width = 128;
     int image_height = 64;
     /* unsigned char* image_data = stbi_load_from_memory(out_buff, len, &image_width, &image_height, NULL, 4);
-    if (image_data == NULL)
+    if(image_data == NULL)
         return false; */
 
     // Create a OpenGL texture identifier
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
         return -1;
@@ -261,11 +261,13 @@ int main(int argc, char* argv[])
     //IM_ASSERT(font != NULL);
 
     // Our state
+    bool show_toolbox = false;
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 
     // Main loop
     bool done = false;
+    bool first_cycle = true;
     while (!done)
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -277,9 +279,9 @@ int main(int argc, char* argv[])
         while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
+            if(event.type == SDL_QUIT)
                 done = true;
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+            if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
         }
 
@@ -287,23 +289,6 @@ int main(int argc, char* argv[])
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
-
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Toolbox");
-
-            ImGui::Checkbox("Assets window", &show_demo_window);
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); 
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
 
         ImGui::SetNextWindowPos({0, 690});
         ImGui::SetNextWindowSize({400, 30});
@@ -340,14 +325,20 @@ int main(int argc, char* argv[])
             ImGui::EndMenuBar();
         }
         ImGui::Text("Config File");
-        static char configFileText[1024 * 16] = "";
-        ImGui::InputTextMultiline("##source", configFileText, IM_ARRAYSIZE(configFileText), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 47), ImGuiInputTextFlags_AllowTabInput);
-        ImGui::Button("Save Config File");
-        if (ImGui::IsItemHovered())
+        static char configFileText[1024 * 16] = {0};
+        ImGui::InputTextMultiline("##source", configFileText, IM_ARRAYSIZE(configFileText), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 47), ImGuiInputTextFlags_ReadOnly);
+        ImGui::Button("Copy config to clipboard");
+        /* if(ImGui::IsItemHovered())
         {
             ImGui::BeginTooltip();
             ImGui::Text("Not working yet..");
             ImGui::EndTooltip();
+        } */
+        if(ImGui::IsItemClicked())
+        {
+            ImGui::SetClipboardText(configFileText);
+            /* ImGui::SameLine();
+            ImGui::Text("Copied to clipboard"); */
         }
         ImGui::End();
 
@@ -364,7 +355,7 @@ int main(int argc, char* argv[])
         /* ImGui::Text("pointer = %d", my_animation[frame_num]);
         ImGui::Text("size = %d x %d", my_image_width, my_image_height); */
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-        if (ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
+        if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
         {
             int current_anim = 0;
             while(current_anim < animations_wallet->animations_number)
@@ -383,6 +374,21 @@ int main(int argc, char* argv[])
                     animations_wallet->animations.at(current_anim)->selected^= 1;
                 }
                 ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
+                ImGui::SameLine();
+                if(ImGui::Button("Preview"))
+                {
+                    ImGui::OpenPopup("Fullscreen Preview");
+                }
+
+                if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
+                {
+                    ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(my_image_width*7.f, my_image_height*7.f));
+                    if (ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                        ImGui::CloseCurrentPopup();
+                        ImGui::SameLine();
+                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                    ImGui::EndPopup();
+                }
                 if(animations_wallet->animations.at(current_anim)->selected)
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
                 ImGui::PopID();
@@ -410,6 +416,27 @@ int main(int argc, char* argv[])
         }
         ImGui::End();
 
+        if(show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+
+        if(show_toolbox)
+        {
+            //static float f = 0.0f;
+            if(first_cycle)
+            {
+                ImGui::SetNextWindowPos({30, 550});
+                ImGui::SetNextWindowCollapsed(true, 2);
+            }
+            ImGui::Begin("Toolbox");
+            ImGui::Checkbox("Assets", &show_demo_window);
+            /* ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); */
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
         // Rendering
         ImGui::Render();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
@@ -418,6 +445,8 @@ int main(int argc, char* argv[])
         //glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
+        if(first_cycle)
+            first_cycle = false;
     }
 
     // Cleanup
