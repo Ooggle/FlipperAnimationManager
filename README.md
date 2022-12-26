@@ -6,14 +6,12 @@
 
 <h3 align="center">
   Visualize and manage your <a href="https://flipperzero.one">Flipper Zero</a> animations directly from your computer.
-
-<br>
+</h3>
 
 <p align="center">
     <img alt="img last release" src="https://img.shields.io/github/release/Ooggle/FlipperAnimationManager.svg?color=blue">
     <img alt="img last commit" src="https://img.shields.io/github/last-commit/Ooggle/FlipperAnimationManager.svg">
     <a href="https://twitter.com/intent/follow?screen_name=Ooggle_" title="Follow"><img src="https://img.shields.io/twitter/follow/Ooggle_?label=Ooggle_&style=social"></a>
-    <br>
 </p>
 
 <hr>
@@ -33,4 +31,62 @@ Download the lasted version for your distribution from <a href="releases">the Re
 
 ## Build from sources
 
-Comming soon...
+### Linux and Mac OS
+
+Install dependencies:   
+```bash
+# On Linux
+sudo apt install libsdl2-dev g++ make
+
+# On Mac OS (be sure to have g++ and make installed, via XCode for example)
+brew install sdl2
+```
+
+Clone the repository:   
+```bash
+git clone https://github.com/Ooggle/FlipperAnimationManager.git && cd FlipperAnimationManager
+```
+
+Building the project:   
+```bash
+make
+```
+
+The binary will be located in `build` folder.
+
+<br>
+
+### Windows
+
+### Via Visual Studio
+
+Clone the project or download a zipped copy of it.
+
+Open the `FlipperAM.sln` file with Visual Studio.
+
+Select the Release configuration and build the project, the output binary will be located in `Release` folder.
+
+<br>
+
+Note: You will have to get a copy of `SDL2.dll` from the <a href="https://github.com/libsdl-org/SDL/releases" target="_blank">SDL repository</a> and have it alongside the .exe in order to run the application. 
+
+<br>
+
+### Via MSYS2/MINGW
+
+Install the following dependencies via the command line tool:   
+```bash
+pacman -S mingw-w64-i686-SDL2
+```
+
+Clone the repository:   
+```bash
+git clone https://github.com/Ooggle/FlipperAnimationManager.git && cd FlipperAnimationManager
+```
+
+Building the project:   
+```bash
+make
+```
+
+The binary will be located in `build` folder.
