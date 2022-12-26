@@ -7,6 +7,8 @@
 <h3 align="center">
   Visualize and manage your <a href="https://flipperzero.one">Flipper Zero</a> animations directly from your computer.
 
+<br>
+
 <p align="center">
     <img alt="img last release" src="https://img.shields.io/github/release/Ooggle/FlipperAnimationManager.svg?color=blue">
     <img alt="img last commit" src="https://img.shields.io/github/last-commit/Ooggle/FlipperAnimationManager.svg">
@@ -15,10 +17,9 @@
 </p>
 
 <hr>
-<br>
 
 <p align="center">
-    Preview<br>
+    Preview<br><br>
     <img src=".github/demo.gif">
 </p>
 
