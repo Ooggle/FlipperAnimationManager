@@ -1,12 +1,3 @@
-// Dear ImGui: standalone example application for SDL2 + OpenGL
-// (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
-
-// **DO NOT USE THIS CODE IF YOUR CODE/ENGINE IS USING MODERN OPENGL (SHADERS, VBO, VAO, etc.)**
-// **Prefer using the code in the example_sdl_opengl3/ folder**
-// See imgui_impl_sdl.cpp for details.
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "imgui.h"
@@ -220,7 +211,7 @@ int main(int argc, char* argv[])
     //bool ret = LoadTextureFromFile("./ooggle.png", &my_image_texture, &my_image_width, &my_image_height);
     //IM_ASSERT(ret);
 
-    AnimationWallet* animations_wallet = new AnimationWallet();
+    AnimationWallet* animations_wallet = new AnimationWallet("../dolphin/");
     animations_wallet->add_animation(std::string("../dolphin/L1_Mods_128x64/"));
     animations_wallet->add_animation(std::string("../dolphin/L1_New_year_128x64/"));
     animations_wallet->add_animation(std::string("../dolphin/L1_JILL_HOME_128x64/"));
@@ -376,17 +367,21 @@ int main(int argc, char* argv[])
                 ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
                 ImGui::SameLine();
                 if(ImGui::Button("Preview"))
-                {
                     ImGui::OpenPopup("Fullscreen Preview");
-                }
+                ImGui::SameLine();
+                if(ImGui::Button("Reload"))
+                    animations_wallet->animations.at(current_anim)->reload_animation();
 
                 if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
                 {
                     ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(my_image_width*7.f, my_image_height*7.f));
-                    if (ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                    if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
                         ImGui::CloseCurrentPopup();
-                        ImGui::SameLine();
-                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                    ImGui::SameLine();
+                    if(ImGui::Button("Reload animation"))
+                        animations_wallet->animations.at(current_anim)->reload_animation();
+                    ImGui::SameLine();
+                    ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
                     ImGui::EndPopup();
                 }
                 if(animations_wallet->animations.at(current_anim)->selected)

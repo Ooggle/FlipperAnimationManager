@@ -29,6 +29,7 @@ class Animation
         std::string anim_folder;
 
     private:
+        void load_animation(std::string anim_folder);
         void next_frame();
         bool read_frames_from_files();
         bool LoadBmFromFile(std::string filename, int file_number);
@@ -37,6 +38,7 @@ class Animation
         Animation(std::string anim_folder);
         ~Animation();
         bool is_valid();
+        void reload_animation();
         GLuint get_frame();
         int get_current_frame_number();
         int get_total_frames_number();

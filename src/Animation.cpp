@@ -2,9 +2,18 @@
 
 Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), time_at_last_frame(std::chrono::system_clock::now())
 {
+    this->load_animation(anim_folder);
+}
+
+void Animation::load_animation(std::string anim_folder)
+{
     std::string line;
     std::ifstream meta_file;
     this->anim_name = anim_folder; // temp
+    this->current_frame_number = 0;
+    this->total_frames_number = 0;
+    this->total_frames_files = 0;
+    this->time_at_last_frame = std::chrono::system_clock::now();
     meta_file.open((anim_folder + std::string("meta.txt")).c_str());
 
     if(!meta_file.is_open()) {
@@ -68,6 +77,12 @@ Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), time_a
     {
         printf("Error for animation %s\n", anim_folder.c_str());
     }
+}
+
+void Animation::reload_animation()
+{
+    this->valid_animation = 0;
+    this->load_animation(this->anim_folder);
 }
 
 Animation::~Animation()

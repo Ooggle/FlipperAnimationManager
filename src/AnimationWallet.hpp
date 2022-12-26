@@ -14,7 +14,7 @@ class AnimationWallet
     private:
 
     public:
-        AnimationWallet();
+        AnimationWallet(std::string dolphin_path = std::string(""));
         ~AnimationWallet();
         void add_animation(std::string anim_folder);
 };

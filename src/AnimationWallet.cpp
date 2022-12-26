@@ -1,8 +1,8 @@
 #include "AnimationWallet.hpp"
 
-AnimationWallet::AnimationWallet()
+AnimationWallet::AnimationWallet(std::string dolphin_path)
 {
-    
+    printf("dophin_path: %s\n", dolphin_path.c_str());
 }
 
 AnimationWallet::~AnimationWallet()
