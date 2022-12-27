@@ -35,7 +35,8 @@ jobs:
       - run:
           name: Run Windows Build
           command: | # build sln
-            Invoke-Expression setupWinBuild.ps1 && msbuild FlipperAM.sln /p:Configuration=Release
+            Invoke-Expression setupWinBuild.ps1 
+            msbuild FlipperAM.sln /p:Configuration=Release
     
 # Create invoker (workflows)
 workflows:
