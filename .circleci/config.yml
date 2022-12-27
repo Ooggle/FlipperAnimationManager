@@ -1,0 +1,35 @@
+version: 2.1
+
+# Load Windows orbs
+orbs:
+  win: circleci/windows@5.0
+
+jobs:
+  # Linux Build Job
+  buildLinux:
+    docker:
+      - image: ubuntu:latest
+    steps:
+      - checkout
+      - run:
+          name: Run Linux Build
+          command: | # Run apt update, install deps, and make
+            apt-get update && apt-get install libsdl2-dev g++ make -y && make
+  # Mac Build Job
+  buildMac: 
+    macos:
+       xcode: 13.4.1
+    steps:
+      - checkout
+      - run:
+          name: Run Mac Build
+          command: | # install brew, install deps, and make
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install sdl2 && make
+    
+# Create invoker (workflows)
+workflows:
+  build: 
+    # Invoke all and run
+    jobs:
+      - buildLinux
+      - buildMac
