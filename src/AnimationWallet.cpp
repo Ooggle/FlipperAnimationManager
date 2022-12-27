@@ -19,7 +19,7 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
                 f = full_path + "meta.txt";
                 if(fs::exists(f))
                 {
-                    Animation* anim = new Animation(full_path);
+                    Animation* anim = new Animation(full_path, filenameStr);
                     if(anim->is_valid())
                     {
                         this->animations.push_back(anim);

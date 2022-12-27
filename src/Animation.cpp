@@ -90,7 +90,7 @@ void Animation::reload_animation()
 
 Animation::~Animation()
 {
-    // TODO: delete textures
+    // TODO: delete textures before someone detect that there is a little leakage of memory
     if(this->frames != NULL)
         free(this->frames);
 }
@@ -285,4 +285,9 @@ int Animation::get_total_frames_number()
 int Animation::get_total_frames_files()
 {
     return this->total_frames_files;
+}
+
+int Animation::get_weight()
+{
+    return this->weight;
 }

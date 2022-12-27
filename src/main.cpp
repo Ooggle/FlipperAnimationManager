@@ -40,7 +40,17 @@ int main(int argc, char* argv[])
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    char current_animations_folder[1024] = "./dolphin/";
+    char default_animation_folder[] = "./dolphin/";
+    char current_animations_folder[1024];
+    if(argc > 1)
+    {
+        if(strlen(argv[1]) <= 1024)
+            strcpy(current_animations_folder, argv[1]);
+        else
+            strcpy(current_animations_folder, default_animation_folder);
+    }
+    else
+        strcpy(current_animations_folder, default_animation_folder);
 
     AnimationWallet* animations_wallet = new AnimationWallet(current_animations_folder);
 
@@ -91,6 +101,7 @@ int main(int argc, char* argv[])
     bool first_cycle = true;
     while (!done)
     {
+        std::string manifest_content = "Filetype: Flipper Animation Manifest\nVersion: 1\n";
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -123,7 +134,106 @@ int main(int argc, char* argv[])
                     );
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
-    
+
+        ImGui::SetNextWindowPos({400, 0});
+        ImGui::SetNextWindowSize({880, 720});
+        ImGui::Begin("Flipper Animation Gallery",
+                    NULL,
+                    ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoSavedSettings |
+                    ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoMove |
+                    ImGuiWindowFlags_NoTitleBar
+                    );
+        if(animations_wallet->animations_number != 0)
+        {
+            if(ImGui::Button("Select all"))
+            {
+                int current_anim = 0;
+                while(current_anim < animations_wallet->animations_number)
+                {
+                    animations_wallet->animations.at(current_anim)->selected = true;
+                    current_anim+= 1;
+                }
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Deselect all"))
+            {
+                int current_anim = 0;
+                while(current_anim < animations_wallet->animations_number)
+                {
+                    animations_wallet->animations.at(current_anim)->selected = false;
+                    current_anim+= 1;
+                }
+            }
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+
+            if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
+            {
+                int current_anim = 0;
+                while(current_anim < animations_wallet->animations_number)
+                {
+                    if(current_anim % 2 == 0)
+                        ImGui::TableNextRow();
+
+                    ImGui::TableSetColumnIndex(current_anim % 2);
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20.f);
+                    ImGui::BeginGroup();
+                    ImGui::PushID(current_anim);
+                    ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
+                    ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*3.f, image_height*3.f));
+                    if(ImGui::IsItemClicked())
+                    {
+                        animations_wallet->animations.at(current_anim)->selected^= 1;
+                    }
+                    ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
+                    ImGui::SameLine();
+                    if(ImGui::Button("Reload"))
+                        animations_wallet->animations.at(current_anim)->reload_animation();
+                    ImGui::SameLine();
+                    if(ImGui::Button("More"))
+                        ImGui::OpenPopup("Fullscreen Preview");
+                    static int weight = 0;
+                    ImGui::SliderInt("Weight", &animations_wallet->animations.at(current_anim)->weight, 0, 14);
+                    // TODO: add weight
+
+                    if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
+                    {
+                        ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
+                        if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                            ImGui::CloseCurrentPopup();
+                        ImGui::SameLine();
+                        if(ImGui::Button("Reload animation"))
+                            animations_wallet->animations.at(current_anim)->reload_animation();
+                        ImGui::SameLine();
+                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                        ImGui::EndPopup();
+                    }
+                    if(animations_wallet->animations.at(current_anim)->selected)
+                    {
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
+                        // update manifest content
+                        manifest_content.append("\nName: " + animations_wallet->animations.at(current_anim)->anim_name + "\nMin butthurt: 0\nMax butthurt: 14\nMin level: 1\nMax level: 30\nWeight: " + std::to_string(animations_wallet->animations.at(current_anim)->weight) + "\n");
+                    }
+
+                    ImGui::PopID();
+                    ImGui::EndGroup();
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+                    current_anim+= 1;
+                }
+                ImGui::EndTable();
+            }
+        }
+        else
+        {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 320.f);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 175.f);
+            ImGui::SetWindowFontScale(2.f);
+            ImGui::Text("No animation found in selected folder.");
+            ImGui::SetWindowFontScale(1.f);
+        }
+        ImGui::End();
+
         ImGui::SetNextWindowPos({0, 0});
         ImGui::SetNextWindowSize({400, 690});
         ImGui::Begin("Left Window",
@@ -170,91 +280,21 @@ int main(int argc, char* argv[])
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
         ImGui::Separator();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-        ImGui::Text("Manifest File (work in progress)");
-        static char configFileText[1024 * 16] = {0};
-        ImGui::InputTextMultiline("##source", configFileText, IM_ARRAYSIZE(configFileText), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 20), ImGuiInputTextFlags_ReadOnly);
+        // TODO: optimize this bad way of generating manifest.txt
+        ImGui::Text("Manifest.txt");
+        char* manifest_content_char = (char*)malloc(sizeof(char) * manifest_content.size());
+        strcpy(manifest_content_char, manifest_content.c_str());
+        ImGui::InputTextMultiline("##source", manifest_content_char, manifest_content.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 40), ImGuiInputTextFlags_ReadOnly);
         if(ImGui::Button("Copy Manifest to clipboard"))
         {
-            ImGui::SetClipboardText(configFileText);
+            ImGui::SetClipboardText(manifest_content_char);
             // TODO: show copied to clipboard message
         }
-        ImGui::End();
-
-        ImGui::SetNextWindowPos({400, 0});
-        ImGui::SetNextWindowSize({880, 720});
-        ImGui::Begin("Flipper Animation Gallery",
-                    NULL,
-                    ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_NoSavedSettings |
-                    ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoMove |
-                    ImGuiWindowFlags_NoTitleBar
-                    );
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-        if(animations_wallet->animations_number != 0)
-        {
-            if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
-            {
-                int current_anim = 0;
-                while(current_anim < animations_wallet->animations_number)
-                {
-                    if(current_anim % 2 == 0)
-                        ImGui::TableNextRow();
-
-                    ImGui::TableSetColumnIndex(current_anim % 2);
-                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20.f);
-                    ImGui::BeginGroup();
-                    ImGui::PushID(current_anim);
-                    ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
-                    ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*3.f, image_height*3.f));
-                    if(ImGui::IsItemClicked())
-                    {
-                        animations_wallet->animations.at(current_anim)->selected^= 1;
-                    }
-                    ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
-                    ImGui::SameLine();
-                    if(ImGui::Button("Preview"))
-                        ImGui::OpenPopup("Fullscreen Preview");
-                    ImGui::SameLine();
-                    if(ImGui::Button("Reload"))
-                        animations_wallet->animations.at(current_anim)->reload_animation();
-                    // TODO: add weight
-
-                    if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
-                    {
-                        ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
-                        if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
-                            ImGui::CloseCurrentPopup();
-                        ImGui::SameLine();
-                        if(ImGui::Button("Reload animation"))
-                            animations_wallet->animations.at(current_anim)->reload_animation();
-                        ImGui::SameLine();
-                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
-                        ImGui::EndPopup();
-                    }
-                    if(animations_wallet->animations.at(current_anim)->selected)
-                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
-                    ImGui::PopID();
-                    ImGui::EndGroup();
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-                    current_anim+= 1;
-                }
-                ImGui::EndTable();
-            }
-        }
-        else
-        {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 300.f);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 175.f);
-            ImGui::SetWindowFontScale(2.f);
-            ImGui::Text("No animation found in selected folder.");
-            ImGui::SetWindowFontScale(1.f);
-        }
+        free(manifest_content_char);
         ImGui::End();
 
         if(show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
-
 
         if(show_toolbox)
         {

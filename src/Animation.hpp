@@ -25,6 +25,7 @@ class Animation
 
     public:
         bool selected = 0;
+        int weight = 8;
         std::string anim_name;
         std::string anim_folder;
 
@@ -44,6 +45,7 @@ class Animation
         int get_current_frame_number();
         int get_total_frames_number();
         int get_total_frames_files();
+        int get_weight();
 };
 
 #endif
