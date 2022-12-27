@@ -15,7 +15,6 @@ jobs:
           name: Run Linux Build
           command: |
             apt-get update && apt-get install libsdl2-dev g++ make -y && make
-
   buildMac: 
     macos:
        xcode: 13.4.1
@@ -24,7 +23,7 @@ jobs:
       - run:
           name: Run Mac Build
           command: |
-            echo "todo" && exit 0
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && make
     
 
 # Invoke jobs via workflows
