@@ -14,7 +14,7 @@ jobs:
       - run:
           name: Run Linux Build
           command: |
-            apt-get install libsdl2-dev g++ make && make
+            apt-get update && apt-get install libsdl2-dev g++ make -y && make
 
   buildMac: 
     macos:
