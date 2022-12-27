@@ -17,8 +17,8 @@ extern "C" {
 // Main code
 int main(int argc, char* argv[])
 {
-    const int version_major = 0;
-    const int version_minor = 9;
+    const int version_major = 1;
+    const int version_minor = 0;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -53,6 +53,8 @@ int main(int argc, char* argv[])
         strcpy(current_animations_folder, default_animation_folder);
 
     AnimationWallet* animations_wallet = new AnimationWallet(current_animations_folder);
+
+    // TODO: Manifest reader
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -90,6 +92,9 @@ int main(int argc, char* argv[])
     // animations size:
     const int image_width = 128;
     const int image_height = 64;
+
+    char* manifest_content_char = (char*)malloc(sizeof(char) * 1000);
+    int manifest_content_max_size = sizeof(char) * 1000;
 
     // Our state
     bool show_toolbox = false;
@@ -259,7 +264,7 @@ int main(int argc, char* argv[])
                     ImGui::Text("Flipper-Zero Animation Manager v%d.%d", version_major, version_minor);
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Text("Made with <3 by Ooggle");
-                    ImGui::Text("https://github.com/Ooggle"); // TODO: clickable link
+                    ImGui::Text("https://github.com/Ooggle/FlipperAnimationManager"); // TODO: clickable link
                     ImGui::Separator();
                     if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
                         ImGui::CloseCurrentPopup();
@@ -281,16 +286,25 @@ int main(int argc, char* argv[])
         ImGui::Separator();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
         // TODO: optimize this bad way of generating manifest.txt
+
         ImGui::Text("Manifest.txt");
-        char* manifest_content_char = (char*)malloc(sizeof(char) * manifest_content.size());
-        strcpy(manifest_content_char, manifest_content.c_str());
+
+        if(strcmp(manifest_content_char, manifest_content.c_str()))
+        {
+            // Not very pretty but it will remain like that until I found something better without abusing (re)allocations
+            if(sizeof(char) * manifest_content.size() > manifest_content_max_size)
+            {
+                manifest_content_max_size+= sizeof(char) * 1000;
+                manifest_content_char = (char*)realloc(manifest_content_char, manifest_content_max_size);
+            }
+            strcpy(manifest_content_char, manifest_content.c_str());
+        }
         ImGui::InputTextMultiline("##source", manifest_content_char, manifest_content.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 40), ImGuiInputTextFlags_ReadOnly);
         if(ImGui::Button("Copy Manifest to clipboard"))
         {
             ImGui::SetClipboardText(manifest_content_char);
             // TODO: show copied to clipboard message
         }
-        free(manifest_content_char);
         ImGui::End();
 
         if(show_demo_window)
@@ -327,6 +341,7 @@ int main(int argc, char* argv[])
 
     // Cleanup
     delete(animations_wallet);
+    free(manifest_content_char);
 
     // Cleanup Imgui
     ImGui_ImplOpenGL2_Shutdown();
