@@ -14,176 +14,11 @@ extern "C" {
     #include "heatshrink_decoder.h"
 }
 
-
-bool LoadTextureFromFileCustom(const char* filename, GLuint* out_texture, int* out_width, int* out_height)
-{
-    // Load from file
-    FILE *f = stbi__fopen(filename, "rb");
-    if(!f) printf("Failed opening file\n");
-    fseek(f, 0, SEEK_END);
-    int len = ftell(f);
-    //printf("Size: %d\n", len);
-    fseek(f, 0, SEEK_SET);
-    unsigned char* buffer = (unsigned char*)malloc(len+1);
-    unsigned char* out_buff = (unsigned char*)malloc(1024);
-    fread(buffer, sizeof(char), len, f);
-    fclose(f);
-    /* printf("first chars:");
-    for(int i = 0; i < 10; i++)
-    {
-        printf(" 0x%02x", buffer[i]);
-    }
-    printf("\n"); */
-    unsigned char* good_buffer = NULL;
-    unsigned char* image_data = NULL;
-    //printf("data: %d\n", buffer[0]);
-    if(buffer[0] == 1)
-    {
-        // Decompress using lzss heatshrink lib
-        good_buffer = buffer + 4;
-        int good_len = len - 4;
-        /* printf("first chars:");
-        for(int i = 0; i < 10; i++)
-        {
-            printf(" 0x%02x", good_buffer[i]);
-        }
-        printf("\n"); */
-        //printf("good_len: %d\n", good_len);
-
-        // Decode bm file
-        heatshrink_decoder* decoder = heatshrink_decoder_alloc(good_len, 8, 4);
-        size_t input_size;
-        HSD_sink_res sink_res = heatshrink_decoder_sink(decoder, (uint8_t *)good_buffer, (size_t)good_len, &input_size);
-        if(sink_res) {}
-        //printf("size consumed: %ld\n", input_size);
-
-        HSD_poll_res poll_res;
-        /* while(input_size != 0)
-        { */
-        poll_res = heatshrink_decoder_poll(decoder, (uint8_t *)out_buff, 1024, &input_size);
-        if(poll_res) {}
-        heatshrink_decoder_finish(decoder);
-        heatshrink_decoder_free(decoder);
-        //printf("size polled: %ld\n", input_size);
-        /* } */
-        /* printf("first chars:");
-        for(int i = 0; i < 100; i++)
-        {
-            printf(" 0x%02x,", out_buff[i]);
-        }
-        printf("\n"); */
-
-        image_data = (unsigned char*)malloc(1024*8*4);
-        int pos = 0;
-        int col = 0;
-        for(int i = 0; i < 1024; i++)
-        {
-            for(int j = 0; j < 8; j++)
-            {
-                bool pix = (out_buff[i] >> j) & 0b1;
-                if(pix == 1)
-                {
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                else
-                {
-                    image_data[pos] = 255;
-                    pos+= 1;
-                    image_data[pos] = 141;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                image_data[pos] = 255;
-                pos+= 1;
-            }
-        }
-
-        /* printf("debug this vjsernbgoiuer image_data:\n");
-        for(int i = 0; i < 4096; i++)
-        {
-            printf(", %d", image_data[i]);
-        }
-        printf("\n"); */
-
-        // what was I trying to do making a png from scratch??
-        /* f = stbi__fopen("./tiny.png", "wb");
-        if(!f) printf("Failed opening file\n");
-        fprintf(f, "\x89PNG\r\n\x1a\n");
-        fprintf(f, "%c%c%c\x0D", 0, 0, 0);
-        fprintf(f, "IHDR");
-        fprintf(f, "%c%c%c\x03", 0, 0, 0);
-        fprintf(f, "%c%c%c\x01", 0, 0, 0);
-        fprintf(f, "\x08");
-        fprintf(f, "\x02");
-        fprintf(f, "%c%c%c", 0, 0, 0);
-        fprintf(f, "\x94\x82\x83\xE3");
-        fprintf(f, "%c%c%c\x15", 0, 0, 0);
-        fprintf(f, "IDAT");
-        fprintf(f, "\x08\x1D\x01");
-        fprintf(f, "\x0A%c", 0);
-        fprintf(f, "\xF5\xFF");
-        fprintf(f, "%c", 0);
-        fprintf(f, "\xFF%c%c%c\xFF%c%c%c\xFF", 0, 0, 0, 0, 0, 0);
-        fprintf(f, "\x0E\xFB\x02\xFE");
-        fprintf(f, "\xE9\x32\x61\xE5");
-        fprintf(f, "%c%c%c%c", 0, 0, 0, 0);
-        fprintf(f, "IEND");
-        fprintf(f, "\xAE\x42\x60\x82");
-        fclose(f); */
-
-    }
-    else if(buffer[0] == 0)
-    {
-
-    }
-    else
-        // Houston??
-        return -1;
-
-    free(buffer);
-    free(out_buff);
-
-    // Load from buffer
-    int image_width = 128;
-    int image_height = 64;
-    /* unsigned char* image_data = stbi_load_from_memory(out_buff, len, &image_width, &image_height, NULL, 4);
-    if(image_data == NULL)
-        return false; */
-
-    // Create a OpenGL texture identifier
-    GLuint image_texture;
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
-
-    // Setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-
-    // Upload pixels into texture
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    stbi_image_free(image_data);
-
-    *out_texture = image_texture;
-    *out_width = image_width;
-    *out_height = image_height;
-
-    return true;
-}
-
 // Main code
 int main(int argc, char* argv[])
 {
+    const int version_major = 0;
+    const int version_minor = 9;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -205,18 +40,9 @@ int main(int argc, char* argv[])
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    int my_image_width = 128;
-    int my_image_height = 64;
-    //GLuint my_image_texture = 0;
-    //bool ret = LoadTextureFromFile("./ooggle.png", &my_image_texture, &my_image_width, &my_image_height);
-    //IM_ASSERT(ret);
+    char current_animations_folder[1024] = "./dolphin/";
 
-    AnimationWallet* animations_wallet = new AnimationWallet("../dolphin/");
-    animations_wallet->add_animation(std::string("../dolphin/L1_Mods_128x64/"));
-    animations_wallet->add_animation(std::string("../dolphin/L1_New_year_128x64/"));
-    animations_wallet->add_animation(std::string("../dolphin/L1_JILL_HOME_128x64/"));
-    animations_wallet->add_animation(std::string("../dolphin/Haseo_A_New_Hope_128x64/"));
-
+    AnimationWallet* animations_wallet = new AnimationWallet(current_animations_folder);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -250,6 +76,10 @@ int main(int argc, char* argv[])
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
+
+    // animations size:
+    const int image_width = 128;
+    const int image_height = 64;
 
     // Our state
     bool show_toolbox = false;
@@ -309,27 +139,44 @@ int main(int argc, char* argv[])
         {
             if(ImGui::BeginMenu("Menu"))
             {
-                ImGui::MenuItem("(Nothing here for now...)", NULL, false, false);
+                ImGui::MenuItem("(...)", NULL, false, false);
+                ImGui::MenuItem("About");
+                if(ImGui::IsItemClicked())
+                    ImGui::OpenPopup("About");
+                
+                if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
+                {
+                    ImGui::Text("Flipper-Zero Animation Manager v%d.%d", version_major, version_minor);
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                    ImGui::Text("Made with <3 by Ooggle");
+                    ImGui::Text("https://github.com/Ooggle"); // TODO: clickable link
+                    ImGui::Separator();
+                    if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                        ImGui::CloseCurrentPopup();
+                    ImGui::EndPopup();
+                }
                 ImGui::MenuItem("Quit", "Alt+F4", &done);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
         }
-        ImGui::Text("Config File");
-        static char configFileText[1024 * 16] = {0};
-        ImGui::InputTextMultiline("##source", configFileText, IM_ARRAYSIZE(configFileText), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 47), ImGuiInputTextFlags_ReadOnly);
-        ImGui::Button("Copy config to clipboard");
-        /* if(ImGui::IsItemHovered())
+        ImGui::InputText("Dolphin folder", current_animations_folder, 1024);
+        if(ImGui::Button("Load"))
         {
-            ImGui::BeginTooltip();
-            ImGui::Text("Not working yet..");
-            ImGui::EndTooltip();
-        } */
-        if(ImGui::IsItemClicked())
+            delete(animations_wallet);
+            animations_wallet = new AnimationWallet(current_animations_folder);
+        }
+
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+        ImGui::Separator();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+        ImGui::Text("Manifest File (work in progress)");
+        static char configFileText[1024 * 16] = {0};
+        ImGui::InputTextMultiline("##source", configFileText, IM_ARRAYSIZE(configFileText), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 20), ImGuiInputTextFlags_ReadOnly);
+        if(ImGui::Button("Copy Manifest to clipboard"))
         {
             ImGui::SetClipboardText(configFileText);
-            /* ImGui::SameLine();
-            ImGui::Text("Copied to clipboard"); */
+            // TODO: show copied to clipboard message
         }
         ImGui::End();
 
@@ -343,71 +190,65 @@ int main(int argc, char* argv[])
                     ImGuiWindowFlags_NoMove |
                     ImGuiWindowFlags_NoTitleBar
                     );
-        /* ImGui::Text("pointer = %d", my_animation[frame_num]);
-        ImGui::Text("size = %d x %d", my_image_width, my_image_height); */
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-        if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
+        if(animations_wallet->animations_number != 0)
         {
-            int current_anim = 0;
-            while(current_anim < animations_wallet->animations_number)
+            if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
             {
-                if(current_anim % 2 == 0)
-                    ImGui::TableNextRow();
+                int current_anim = 0;
+                while(current_anim < animations_wallet->animations_number)
+                {
+                    if(current_anim % 2 == 0)
+                        ImGui::TableNextRow();
 
-                ImGui::TableSetColumnIndex(current_anim % 2);
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20.f);
-                ImGui::BeginGroup();
-                ImGui::PushID(current_anim);
-                ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
-                ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(my_image_width*3.f, my_image_height*3.f));
-                if(ImGui::IsItemClicked())
-                {
-                    animations_wallet->animations.at(current_anim)->selected^= 1;
-                }
-                ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
-                ImGui::SameLine();
-                if(ImGui::Button("Preview"))
-                    ImGui::OpenPopup("Fullscreen Preview");
-                ImGui::SameLine();
-                if(ImGui::Button("Reload"))
-                    animations_wallet->animations.at(current_anim)->reload_animation();
-
-                if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
-                {
-                    ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(my_image_width*7.f, my_image_height*7.f));
-                    if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
-                        ImGui::CloseCurrentPopup();
-                    ImGui::SameLine();
-                    if(ImGui::Button("Reload animation"))
-                        animations_wallet->animations.at(current_anim)->reload_animation();
-                    ImGui::SameLine();
-                    ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
-                    ImGui::EndPopup();
-                }
-                if(animations_wallet->animations.at(current_anim)->selected)
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
-                ImGui::PopID();
-                ImGui::EndGroup();
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-                current_anim+= 1;
-            }
-            /* for (int row = 0; row < 4; row++)
-            {
-                ImGui::TableNextRow();
-                for (int column = 0; column < 2; column++)
-                {
-                    ImGui::TableSetColumnIndex(column);
+                    ImGui::TableSetColumnIndex(current_anim % 2);
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20.f);
                     ImGui::BeginGroup();
-                    ImGui::Text("%s", anim1->anim_name.c_str());
-                    ImGui::Image((void*)(intptr_t)anim1->get_frame(), ImVec2(my_image_width*3.f, my_image_height*3.f));
-                    static bool check = false;
-                    ImGui::Checkbox("Use This Animation", &check);
+                    ImGui::PushID(current_anim);
+                    ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
+                    ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*3.f, image_height*3.f));
+                    if(ImGui::IsItemClicked())
+                    {
+                        animations_wallet->animations.at(current_anim)->selected^= 1;
+                    }
+                    ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
+                    ImGui::SameLine();
+                    if(ImGui::Button("Preview"))
+                        ImGui::OpenPopup("Fullscreen Preview");
+                    ImGui::SameLine();
+                    if(ImGui::Button("Reload"))
+                        animations_wallet->animations.at(current_anim)->reload_animation();
+                    // TODO: add weight
+
+                    if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
+                    {
+                        ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
+                        if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                            ImGui::CloseCurrentPopup();
+                        ImGui::SameLine();
+                        if(ImGui::Button("Reload animation"))
+                            animations_wallet->animations.at(current_anim)->reload_animation();
+                        ImGui::SameLine();
+                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                        ImGui::EndPopup();
+                    }
+                    if(animations_wallet->animations.at(current_anim)->selected)
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
+                    ImGui::PopID();
                     ImGui::EndGroup();
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+                    current_anim+= 1;
                 }
-            } */
-            ImGui::EndTable();
+                ImGui::EndTable();
+            }
+        }
+        else
+        {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 300.f);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 175.f);
+            ImGui::SetWindowFontScale(2.f);
+            ImGui::Text("No animation found in selected folder.");
+            ImGui::SetWindowFontScale(1.f);
         }
         ImGui::End();
 

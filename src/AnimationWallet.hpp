@@ -3,7 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 #include "Animation.hpp"
+
+namespace fs = std::filesystem;
 
 class AnimationWallet
 {

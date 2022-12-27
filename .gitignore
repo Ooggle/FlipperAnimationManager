@@ -29,3 +29,6 @@ bld/
 
 # Visual Studio 2015/2022 cache/options directory
 .vs/
+
+# Visual Studio Code user configuration
+.vscode/

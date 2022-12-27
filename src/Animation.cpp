@@ -1,6 +1,11 @@
 #include "Animation.hpp"
 
-Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), time_at_last_frame(std::chrono::system_clock::now())
+Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), anim_name(anim_folder), time_at_last_frame(std::chrono::system_clock::now())
+{
+    this->load_animation(anim_folder);
+}
+
+Animation::Animation(std::string anim_folder, std::string anim_name) : anim_folder(anim_folder), anim_name(anim_name), time_at_last_frame(std::chrono::system_clock::now())
 {
     this->load_animation(anim_folder);
 }
@@ -9,7 +14,6 @@ void Animation::load_animation(std::string anim_folder)
 {
     std::string line;
     std::ifstream meta_file;
-    this->anim_name = anim_folder; // temp
     this->current_frame_number = 0;
     this->total_frames_number = 0;
     this->total_frames_files = 0;
@@ -34,7 +38,6 @@ void Animation::load_animation(std::string anim_folder)
             try
             {
                 this->time_per_frame = 1 / (float)std::stoi(line.substr(12, line.length() - 12).c_str());
-                //printf("this->time_per_frame: %f\n", this->time_per_frame);
                 time_per_frame_ok = 1;
             }
             catch(const std::exception& e) {}
@@ -46,7 +49,6 @@ void Animation::load_animation(std::string anim_folder)
         {
             try
             {
-                //this->time_per_frame = 1 / (float)std::stoi(line.substr(12, line.length() - 12).c_str());
                 std::string raw_frames_order((line.substr(13, line.length() - 13)).c_str());
 
                 size_t start;
@@ -58,7 +60,8 @@ void Animation::load_animation(std::string anim_folder)
                     this->frames_order.push_back(std::stoi(raw_frames_order.substr(start, end - start)));
                 }
 
-                for (int frame: this->frames_order) {
+                for(int frame: this->frames_order)
+                {
                     if(frame >= this->total_frames_files)
                         this->total_frames_files = frame + 1;
                 }
@@ -87,6 +90,7 @@ void Animation::reload_animation()
 
 Animation::~Animation()
 {
+    // TODO: delete textures
     if(this->frames != NULL)
         free(this->frames);
 }
@@ -102,12 +106,10 @@ void Animation::next_frame()
 
 bool Animation::read_frames_from_files()
 {
-    //printf("total_frames_files: %d\n", this->total_frames_files);
     this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
     for(int i = 0; i < this->total_frames_files; i++)
     {
         bool ret = this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i);
-        //printf("ret: %d\n", ret);
         if(ret != 0)
             return -1;
     }
@@ -116,7 +118,6 @@ bool Animation::read_frames_from_files()
 
 bool Animation::LoadBmFromFile(std::string filename, int file_number)
 {
-    //printf("CALL LoadBmFromFile with filename: %s and file_number: %d\n", filename.c_str(), file_number);
     // Load from file
     FILE *f = fopen(filename.c_str(), "rb");
     if(!f)
@@ -126,7 +127,6 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
     }
     fseek(f, 0, SEEK_END);
     int len = ftell(f);
-    //printf("Size: %d\n", len);
     fseek(f, 0, SEEK_SET);
     unsigned char* buffer = (unsigned char*)malloc(len+1);
     unsigned char* out_buff = (unsigned char*)malloc(1024);
@@ -135,7 +135,6 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
 
     unsigned char* good_buffer = NULL;
     unsigned char* image_data = NULL;
-    //printf("data: %d\n", buffer[0]);
     if(buffer[0] == 1)
     {
         // Decompress using lzss heatshrink lib
@@ -147,7 +146,6 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
         size_t input_size;
         HSD_sink_res sink_res = heatshrink_decoder_sink(decoder, (uint8_t *)good_buffer, (size_t)good_len, &input_size);
         if(sink_res) {}
-        //printf("size consumed: %ld\n", input_size);
 
         HSD_poll_res poll_res;
         poll_res = heatshrink_decoder_poll(decoder, (uint8_t *)out_buff, 1024, &input_size);
@@ -253,7 +251,6 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
     free(image_data);
 
     this->frames[file_number] = image_texture;
-    //printf("image_texture: %d\n", image_texture);
 
     return 0;
 }
@@ -262,7 +259,6 @@ GLuint Animation::get_frame()
 {
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - this->time_at_last_frame;
-    //printf("elapsed_seconds.count(): %f\n", elapsed_seconds.count());
     if(elapsed_seconds.count() > this->time_per_frame)
     {
         this->time_at_last_frame = end;

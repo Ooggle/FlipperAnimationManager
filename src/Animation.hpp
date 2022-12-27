@@ -36,6 +36,7 @@ class Animation
 
     public:
         Animation(std::string anim_folder);
+        Animation(std::string anim_folder, std::string anim_name);
         ~Animation();
         bool is_valid();
         void reload_animation();
