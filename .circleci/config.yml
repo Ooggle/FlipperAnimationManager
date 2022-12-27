@@ -23,7 +23,7 @@ jobs:
       - run:
           name: Run Mac Build
           command: |
-            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && make
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install sdl2 && make
     
 
 # Invoke jobs via workflows
