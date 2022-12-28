@@ -23,15 +23,21 @@
 
 <br>
 
-## Installation
+# Installation
 
-Download the lasted version for your distribution from <a href="https://github.com/Ooggle/FlipperAnimationManager/releases">the Releases.</a>
+### Builds are available for Windows, Linux and Mac OS. Download the latest version for your distribution from <a href="https://github.com/Ooggle/FlipperAnimationManager/releases">the Releases.</a>
 
 <br>
 
-## Build from sources
+# Usage
 
-### Linux and Mac OS
+Detailed guide coming soon...
+
+<br>
+
+# Build from sources
+
+## Linux and Mac OS
 
 Install dependencies:   
 ```bash
@@ -56,9 +62,9 @@ The binary will be located in `build` folder.
 
 <br>
 
-### Windows
+## Windows
 
-### Via Visual Studio
+## Via Visual Studio
 
 Clone the project or download a zipped copy of it.
 
@@ -72,7 +78,7 @@ Note: You will have to get a copy of `SDL2.dll` from the <a href="https://github
 
 <br>
 
-### Via MSYS2/MINGW
+## Via MSYS2/MINGW
 
 Install the following dependencies via the command line tool:   
 ```bash
@@ -93,6 +99,6 @@ The binary will be located in `build` folder.
 
 <br>
 
-## Contributing
+# Contributing
 
 Pull requests are welcome. Feel free to open an issue if you want to request/discuss other features.
