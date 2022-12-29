@@ -14,7 +14,7 @@ extern "C" {
 class Animation
 {
     private:
-        bool valid_animation = 0;
+        bool valid_animation = false;
         int current_frame_number = 0;
         int total_frames_number = 0;
         int total_frames_files = 0;
@@ -24,7 +24,7 @@ class Animation
         std::chrono::system_clock::time_point time_at_last_frame;
 
     public:
-        bool selected = 0;
+        bool selected = false;
         int weight = 8;
         std::string anim_name;
         std::string anim_folder;

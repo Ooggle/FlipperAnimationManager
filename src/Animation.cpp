@@ -25,9 +25,9 @@ void Animation::load_animation(std::string anim_folder)
         return;
     }
 
-    bool total_frames_ok = 0;
-    bool time_per_frame_ok = 0;
-    bool frames_ok = 0;
+    bool total_frames_ok = false;
+    bool time_per_frame_ok = false;
+    bool frames_ok = false;
 
     size_t found = 0;
     while(getline(meta_file, line)) {
@@ -67,7 +67,7 @@ void Animation::load_animation(std::string anim_folder)
                 }
                 total_frames_ok = 1;
 
-                if(this->read_frames_from_files() == 0)
+                if(this->read_frames_from_files())
                     frames_ok = 1;
             }
             catch(const std::exception& e) {}
@@ -109,11 +109,10 @@ bool Animation::read_frames_from_files()
     this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
     for(int i = 0; i < this->total_frames_files; i++)
     {
-        bool ret = this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i);
-        if(ret != 0)
-            return -1;
+        if(!this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i))
+            return false;
     }
-    return 0;
+    return true;
 }
 
 bool Animation::LoadBmFromFile(std::string filename, int file_number)
@@ -123,7 +122,7 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
     if(!f)
     {
         printf("Failed opening file\n");
-        return -1;
+        return false;
     }
     fseek(f, 0, SEEK_END);
     int len = ftell(f);
@@ -223,7 +222,7 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
     }
     else
         // Houston??
-        return -1;
+        return false;
 
     free(buffer);
     free(out_buff);
@@ -252,7 +251,7 @@ bool Animation::LoadBmFromFile(std::string filename, int file_number)
 
     this->frames[file_number] = image_texture;
 
-    return 0;
+    return true;
 }
 
 GLuint Animation::get_frame()
