@@ -167,6 +167,7 @@
     <ClCompile Include="src\heatshrink_decoder.c" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationWallet.cpp" />
+    <ClCompile Include="src\Manifest.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>

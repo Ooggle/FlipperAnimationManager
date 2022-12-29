@@ -5,6 +5,7 @@
 #include "imgui_impl_opengl2.h"
 #include "Animation.hpp"
 #include "AnimationWallet.hpp"
+#include "Manifest.hpp"
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
