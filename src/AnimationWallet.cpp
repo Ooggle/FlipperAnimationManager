@@ -6,6 +6,7 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
     std::error_code ec;
     if(fs::is_directory(search_dir, ec))
     {
+        this->is_folder_correct = true;
         for(const auto& entry : fs::directory_iterator(dolphin_path))
         {
             const auto filenameStr = entry.path().filename().string();
@@ -33,6 +34,8 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
             }
         }
     }
+    else
+        this->is_folder_correct = false;
 }
 
 AnimationWallet::~AnimationWallet()
@@ -53,4 +56,9 @@ void AnimationWallet::add_animation(std::string anim_folder)
     {
         delete(anim);
     }
+}
+
+bool AnimationWallet::get_is_folder_correct()
+{
+    return this->is_folder_correct;
 }

@@ -15,6 +15,20 @@ extern "C" {
     #include "heatshrink_decoder.h"
 }
 
+/* Helper from ImGui demo */
+static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 // Main code
 int main(int argc, char* argv[])
 {
@@ -98,7 +112,7 @@ int main(int argc, char* argv[])
     int manifest_content_max_size = sizeof(char) * 1000;
 
     // Our state
-    bool show_toolbox = false;
+    bool show_toolbox = true;
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 
@@ -276,20 +290,31 @@ int main(int argc, char* argv[])
             }
             ImGui::EndMenuBar();
         }
-        ImGui::InputText("Dolphin folder", current_animations_folder, 1024);
+        if(ImGui::InputText("Dolphin folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            delete(animations_wallet);
+            animations_wallet = new AnimationWallet(current_animations_folder);
+        }
         if(ImGui::Button("Load"))
         {
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
         }
+        ImGui::SameLine();
+        if(animations_wallet->get_is_folder_correct())
+            ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.00f), "Sucess, %d animations loaded", animations_wallet->animations_number);
+        else
+        {
+            ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.00f), "Failed, folder not found");
+            ImGui::SameLine();
+            HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
+        }
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
         ImGui::Separator();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-        // TODO: optimize this bad way of generating manifest.txt
 
         ImGui::Text("Manifest.txt");
-
         if(strcmp(manifest_content_char, manifest_content.c_str()))
         {
             // Not very pretty but it will remain like that until I found something better without abusing (re)allocations

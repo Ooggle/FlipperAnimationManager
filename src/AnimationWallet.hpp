@@ -15,11 +15,13 @@ class AnimationWallet
         std::vector<Animation*> animations;
 
     private:
+        bool is_folder_correct = false;
 
     public:
         AnimationWallet(std::string dolphin_path = std::string(""));
         ~AnimationWallet();
         void add_animation(std::string anim_folder);
+        bool get_is_folder_correct();
 };
 
 #endif
