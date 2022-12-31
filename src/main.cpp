@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     int manifest_content_max_size = sizeof(char) * 1000;
 
     // Our state
-    bool show_toolbox = true;
+    bool show_toolbox = false;
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 
@@ -201,6 +201,20 @@ int main(int argc, char* argv[])
                     ImGui::BeginGroup();
                     ImGui::PushID(current_anim);
                     ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                    ImGui::Button(".bm");
+                    ImGui::PopStyleColor(3);
+                    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted(".bm files represents compiled animation files that can directly be used by the Flipper Zero.");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
                     ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*3.f, image_height*3.f));
                     if(ImGui::IsItemClicked())
                     {
