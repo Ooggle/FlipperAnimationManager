@@ -1,5 +1,8 @@
 #include "Animation.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), anim_name(anim_folder), time_at_last_frame(std::chrono::system_clock::now())
 {
     this->load_animation(anim_folder);
@@ -73,6 +76,8 @@ void Animation::load_animation(std::string anim_folder)
             catch(const std::exception& e) {}
         }
     }
+
+    meta_file.close();
     
     if(total_frames_ok && time_per_frame_ok && frames_ok)
         this->valid_animation = 1;
@@ -106,12 +111,79 @@ void Animation::next_frame()
 
 bool Animation::read_frames_from_files()
 {
-    this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
-    for(int i = 0; i < this->total_frames_files; i++)
+    // checks if the animation has bm or png files
+    std::ifstream frame_file;
+    frame_file.open(this->anim_folder + "frame_0.bm");
+    if(frame_file.is_open())
     {
-        if(!this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i))
-            return false;
+        this->format = BM;
+        frame_file.close();
     }
+    else
+    {
+        frame_file.open(this->anim_folder + "frame_0.png");
+        if(frame_file.is_open())
+        {
+            this->format = PNG;
+            frame_file.close();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    if(this->format == BM)
+    {
+        this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
+        for(int i = 0; i < this->total_frames_files; i++)
+        {
+            if(!this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i))
+                return false;
+        }
+    }
+    else if(this->format == PNG)
+    {
+        this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
+        for(int i = 0; i < this->total_frames_files; i++)
+        {
+            if(!this->LoadPngFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".png", i))
+                return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Animation::LoadPngFromFile(std::string filename, int file_number)
+{
+    // Load from file
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename.c_str(), &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create a OpenGL texture identifier
+    GLuint image_texture;
+    glGenTextures(1, &image_texture);
+    glBindTexture(GL_TEXTURE_2D, image_texture);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+    // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    free(image_data);
+
+    this->frames[file_number] = image_texture;
+
     return true;
 }
 

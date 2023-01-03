@@ -11,6 +11,12 @@ extern "C" {
     #include "heatshrink_decoder.h"
 }
 
+typedef enum 
+{ 
+    BM,
+    PNG
+} anim_format;
+
 class Animation
 {
     private:
@@ -26,6 +32,7 @@ class Animation
     public:
         bool selected = false;
         int weight = 8;
+        anim_format format = BM;
         std::string anim_name;
         std::string anim_folder;
 
@@ -33,6 +40,7 @@ class Animation
         void load_animation(std::string anim_folder);
         void next_frame();
         bool read_frames_from_files();
+        bool LoadPngFromFile(std::string filename, int file_number);
         bool LoadBmFromFile(std::string filename, int file_number);
 
     public:

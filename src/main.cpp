@@ -1,5 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl2.h"
@@ -202,19 +200,40 @@ int main(int argc, char* argv[])
                     ImGui::PushID(current_anim);
                     ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                    ImGui::Button(".bm");
-                    ImGui::PopStyleColor(3);
-                    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    if(animations_wallet->animations.at(current_anim)->format == BM)
                     {
-                        ImGui::BeginTooltip();
-                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                        ImGui::TextUnformatted(".bm files represents compiled animation files that can directly be used by the Flipper Zero.");
-                        ImGui::PopTextWrapPos();
-                        ImGui::EndTooltip();
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::Button("bm");
+                        ImGui::PopStyleColor(3);
+                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                        {
+                            ImGui::BeginTooltip();
+                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                            ImGui::TextUnformatted(".bm files represents compiled animation files that can directly be used by the Flipper Zero.");
+                            ImGui::PopTextWrapPos();
+                            ImGui::EndTooltip();
+                        }
                     }
+                    else if(animations_wallet->animations.at(current_anim)->format == PNG)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                        ImGui::Button("png");
+                        ImGui::PopStyleColor(3);
+                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                        {
+                            ImGui::BeginTooltip();
+                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                            // TODO: finish description
+                            ImGui::TextUnformatted(".png files...");
+                            ImGui::PopTextWrapPos();
+                            ImGui::EndTooltip();
+                        }
+                    }
+                    
                     ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*3.f, image_height*3.f));
                     if(ImGui::IsItemClicked())
                     {
