@@ -133,175 +133,145 @@ bool Animation::read_frames_from_files()
         }
     }
 
-    if(this->format == BM)
+    // if a good format is found, proceed to load the files into textures
+    this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
+    for(int i = 0; i < this->total_frames_files; i++)
     {
-        this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
-        for(int i = 0; i < this->total_frames_files; i++)
-        {
-            if(!this->LoadBmFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".bm", i))
-                return false;
-        }
-    }
-    else if(this->format == PNG)
-    {
-        this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
-        for(int i = 0; i < this->total_frames_files; i++)
-        {
-            if(!this->LoadPngFromFile(this->anim_folder + "frame_" + std::to_string(i) + ".png", i))
-                return false;
-        }
+        if(!this->LoadImageFromFile(this->anim_folder + "frame_" + std::to_string(i), i))
+            return false;
     }
     
     return true;
 }
 
-bool Animation::LoadPngFromFile(std::string filename, int file_number)
+bool Animation::LoadImageFromFile(std::string filename, int file_number)
 {
-    // Load from file
-    int image_width = 0;
-    int image_height = 0;
-    unsigned char* image_data = stbi_load(filename.c_str(), &image_width, &image_height, NULL, 4);
-    if (image_data == NULL)
-        return false;
-
-    // Create a OpenGL texture identifier
-    GLuint image_texture;
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
-
-    // Setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-
-    // Upload pixels into texture
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    free(image_data);
-
-    this->frames[file_number] = image_texture;
-
-    return true;
-}
-
-bool Animation::LoadBmFromFile(std::string filename, int file_number)
-{
-    // Load from file
-    FILE *f = fopen(filename.c_str(), "rb");
-    if(!f)
-    {
-        printf("Failed opening file\n");
-        return false;
-    }
-    fseek(f, 0, SEEK_END);
-    int len = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    unsigned char* buffer = (unsigned char*)malloc(len+1);
-    unsigned char* out_buff = (unsigned char*)malloc(1024);
-    fread(buffer, sizeof(char), len, f);
-    fclose(f);
-
-    unsigned char* good_buffer = NULL;
-    unsigned char* image_data = NULL;
-    if(buffer[0] == 1)
-    {
-        // Decompress using lzss heatshrink lib
-        good_buffer = buffer + 4;
-        int good_len = len - 4;
-
-        // Decode bm file
-        heatshrink_decoder* decoder = heatshrink_decoder_alloc(good_len, 8, 4);
-        size_t input_size;
-        HSD_sink_res sink_res = heatshrink_decoder_sink(decoder, (uint8_t *)good_buffer, (size_t)good_len, &input_size);
-        if(sink_res) {}
-
-        HSD_poll_res poll_res;
-        poll_res = heatshrink_decoder_poll(decoder, (uint8_t *)out_buff, 1024, &input_size);
-        if(poll_res) {}
-        heatshrink_decoder_finish(decoder);
-        heatshrink_decoder_free(decoder);
-
-        image_data = (unsigned char*)malloc((1024*8)*4);
-        int pos = 0;
-        int col = 0;
-        for(int i = 0; i < 1024; i++)
-        {
-            for(int j = 0; j < 8; j++)
-            {
-                bool pix = (out_buff[i] >> j) & 0b1;
-                if(pix == 1)
-                {
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                else
-                {
-                    image_data[pos] = 255;
-                    pos+= 1;
-                    image_data[pos] = 141;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                image_data[pos] = 255;
-                pos+= 1;
-            }
-        }
-
-    }
-    else if(buffer[0] == 0)
-    {
-        good_buffer = buffer + 2;
-        int good_len = len - 2;
-
-        image_data = (unsigned char*)malloc((1024*8)*4);
-        int pos = 0;
-        int col = 0;
-        for(int i = 0; i < 1024; i++)
-        {
-            for(int j = 0; j < 8; j++)
-            {
-                bool pix = (good_buffer[i] >> j) & 0b1;
-                if(pix == 1)
-                {
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                else
-                {
-                    image_data[pos] = 255;
-                    pos+= 1;
-                    image_data[pos] = 141;
-                    pos+= 1;
-                    image_data[pos] = 0;
-                    pos+= 1;
-                }
-                image_data[pos] = 255;
-                pos+= 1;
-            }
-        }
-    }
-    else
-        // Houston??
-        return false;
-
-    free(buffer);
-    free(out_buff);
-
     // Image dimensions
     int image_width = 128;
     int image_height = 64;
+    unsigned char* image_data = NULL;
+
+    if(this->format == BM)
+    {
+        filename+= ".bm";
+        // Load from file
+        FILE *f = fopen(filename.c_str(), "rb");
+        if(!f)
+        {
+            printf("Failed opening file\n");
+            return false;
+        }
+        fseek(f, 0, SEEK_END);
+        int len = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        unsigned char* buffer = (unsigned char*)malloc(len+1);
+        unsigned char* out_buff = (unsigned char*)malloc(1024);
+        fread(buffer, sizeof(char), len, f);
+        fclose(f);
+
+        unsigned char* good_buffer = NULL;
+        if(buffer[0] == 1)
+        {
+            // Decompress using lzss heatshrink lib
+            good_buffer = buffer + 4;
+            int good_len = len - 4;
+
+            // Decode bm file
+            heatshrink_decoder* decoder = heatshrink_decoder_alloc(good_len, 8, 4);
+            size_t input_size;
+            HSD_sink_res sink_res = heatshrink_decoder_sink(decoder, (uint8_t *)good_buffer, (size_t)good_len, &input_size);
+            if(sink_res) {}
+
+            HSD_poll_res poll_res;
+            poll_res = heatshrink_decoder_poll(decoder, (uint8_t *)out_buff, 1024, &input_size);
+            if(poll_res) {}
+            heatshrink_decoder_finish(decoder);
+            heatshrink_decoder_free(decoder);
+
+            image_data = (unsigned char*)malloc((1024*8)*4);
+            int pos = 0;
+            int col = 0;
+            for(int i = 0; i < 1024; i++)
+            {
+                for(int j = 0; j < 8; j++)
+                {
+                    bool pix = (out_buff[i] >> j) & 0b1;
+                    if(pix == 1)
+                    {
+                        image_data[pos] = 0;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                    }
+                    else
+                    {
+                        image_data[pos] = 255;
+                        pos+= 1;
+                        image_data[pos] = 141;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                    }
+                    image_data[pos] = 255;
+                    pos+= 1;
+                }
+            }
+
+        }
+        else if(buffer[0] == 0)
+        {
+            good_buffer = buffer + 2;
+            int good_len = len - 2;
+
+            image_data = (unsigned char*)malloc((1024*8)*4);
+            int pos = 0;
+            int col = 0;
+            for(int i = 0; i < 1024; i++)
+            {
+                for(int j = 0; j < 8; j++)
+                {
+                    bool pix = (good_buffer[i] >> j) & 0b1;
+                    if(pix == 1)
+                    {
+                        image_data[pos] = 0;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                    }
+                    else
+                    {
+                        image_data[pos] = 255;
+                        pos+= 1;
+                        image_data[pos] = 141;
+                        pos+= 1;
+                        image_data[pos] = 0;
+                        pos+= 1;
+                    }
+                    image_data[pos] = 255;
+                    pos+= 1;
+                }
+            }
+        }
+        else
+            // Houston??
+            return false;
+
+        free(buffer);
+        free(out_buff);
+    }
+    else if(this->format == PNG)
+    {
+        filename+= ".png";
+        image_data = stbi_load(filename.c_str(), &image_width, &image_height, NULL, 4);
+        if((image_data == NULL) || (image_width > 128 || image_height > 64))
+            return false;
+    }
+    else
+        return false;
 
     // Create a OpenGL texture identifier
     GLuint image_texture;

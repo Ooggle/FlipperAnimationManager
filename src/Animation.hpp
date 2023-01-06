@@ -40,8 +40,7 @@ class Animation
         void load_animation(std::string anim_folder);
         void next_frame();
         bool read_frames_from_files();
-        bool LoadPngFromFile(std::string filename, int file_number);
-        bool LoadBmFromFile(std::string filename, int file_number);
+        bool LoadImageFromFile(std::string filename, int file_number);
 
     public:
         Animation(std::string anim_folder);
