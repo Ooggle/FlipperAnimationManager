@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
     SDL_Window* window = SDL_CreateWindow("Flipper Animation Manager", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
+    SDL_SetWindowMinimumSize(window, 1280, 720);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
     char default_animation_folder[] = "./dolphin/";
