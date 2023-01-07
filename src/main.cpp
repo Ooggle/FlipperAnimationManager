@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
         if(strcmp(manifest_content_char, manifest_content.c_str()))
         {
             // Not very pretty but it will remain like that until I found something better without abusing (re)allocations
-            if(sizeof(char) * manifest_content.size() > manifest_content_max_size)
+            while(sizeof(char) * manifest_content.size() > manifest_content_max_size)
             {
                 manifest_content_max_size+= sizeof(char) * 1000;
                 manifest_content_char = (char*)realloc(manifest_content_char, manifest_content_max_size);
