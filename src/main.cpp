@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | /* SDL_WINDOW_RESIZABLE |  */SDL_WINDOW_ALLOW_HIGHDPI/*  | SDL_WINDOW_BORDERLESS */);
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI/*  | SDL_WINDOW_BORDERLESS */);
     SDL_Window* window = SDL_CreateWindow("Flipper Animation Manager", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
@@ -110,6 +110,8 @@ int main(int argc, char* argv[])
     int manifest_content_max_size = sizeof(char) * 1000;
 
     // Our state
+    int window_width = 1280;
+    int window_height = 720;
     bool show_toolbox = false;
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
@@ -133,6 +135,11 @@ int main(int argc, char* argv[])
                 done = true;
             if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+            {
+                window_width = SDL_GetWindowSurface(window)->w;
+                window_height = SDL_GetWindowSurface(window)->h;
+            }
         }
 
         // Start the Dear ImGui frame
@@ -140,7 +147,7 @@ int main(int argc, char* argv[])
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::SetNextWindowPos({0, 690});
+        ImGui::SetNextWindowPos({0, 690 + ((float)window_height - 720)});
         ImGui::SetNextWindowSize({400, 30});
         ImGui::Begin("Framerate Window",
                     NULL,
@@ -154,7 +161,7 @@ int main(int argc, char* argv[])
         ImGui::End();
 
         ImGui::SetNextWindowPos({400, 0});
-        ImGui::SetNextWindowSize({880, 720});
+        ImGui::SetNextWindowSize({880 + ((float)window_width - 1280), 720 + ((float)window_height - 720)});
         ImGui::Begin("Flipper Animation Gallery",
                     NULL,
                     ImGuiWindowFlags_NoResize |
@@ -186,15 +193,17 @@ int main(int argc, char* argv[])
             }
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
-            if(ImGui::BeginTable("tableGallery", 2, ImGuiTableFlags_PadOuterX))
+            int row_num = 1 + ((window_width - 850) / 420);
+
+            if(ImGui::BeginTable("tableGallery", row_num, ImGuiTableFlags_PadOuterX))
             {
                 int current_anim = 0;
                 while(current_anim < animations_wallet->animations_number)
                 {
-                    if(current_anim % 2 == 0)
+                    if(current_anim % row_num == 0)
                         ImGui::TableNextRow();
 
-                    ImGui::TableSetColumnIndex(current_anim % 2);
+                    ImGui::TableSetColumnIndex(current_anim % row_num);
                     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 20.f);
                     ImGui::BeginGroup();
                     ImGui::PushID(current_anim);
@@ -288,7 +297,7 @@ int main(int argc, char* argv[])
         ImGui::End();
 
         ImGui::SetNextWindowPos({0, 0});
-        ImGui::SetNextWindowSize({400, 690});
+        ImGui::SetNextWindowSize({400, 690 + ((float)window_height - 720)});
         ImGui::Begin("Left Window",
                     NULL,
                     ImGuiWindowFlags_NoResize |
