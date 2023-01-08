@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Terminal=false
+Type=Application
+Name=Flipper Animation Manager
+GenericName=Flipper Animation Manager
+Comment=Customizes your Flipper Zero with animations
+Keywords=flipper;
+Icon=flipperam
+Exec=flipperam
+StartupWMClass=flipperam

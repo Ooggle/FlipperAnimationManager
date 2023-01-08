@@ -350,7 +350,7 @@ int main(int argc, char* argv[])
         {
             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.00f), "Failed, folder not found");
             ImGui::SameLine();
-            HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
+            HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm or .png files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
         }
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);

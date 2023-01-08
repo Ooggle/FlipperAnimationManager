@@ -1,0 +1,8 @@
+Package: flipper-am
+Version: 1.1
+Section: development
+Priority: optional
+Architecture: all
+Maintainer: ooggle@duck.com
+Description: Flipper Animation Manager
+ Customizes your Flipper Zero with animations
