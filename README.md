@@ -25,6 +25,8 @@
 
 # Installation
 
+<h2><a href="https://github.com/Ooggle/FlipperAnimationManager/wiki/Installation-Guide">Detailed Installation Guide here<a></h2>
+
 ### Builds are available for Windows, Linux and Mac OS. Download the latest version for your distribution from <a href="https://github.com/Ooggle/FlipperAnimationManager/releases">the Releases.</a>
 
 <br>
