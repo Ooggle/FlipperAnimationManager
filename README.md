@@ -104,3 +104,10 @@ The binary will be located in `build` folder.
 # Contributing
 
 Pull requests are welcome. Feel free to open an issue if you want to request/discuss other features.
+
+<br>
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/Ooggle/FlipperAnimationManager.svg)](https://starchart.cc/Ooggle/FlipperAnimationManager)
+
