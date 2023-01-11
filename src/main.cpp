@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl2.h"
+#include "file_browser/ImGuiFileBrowser.h"
 #include "Animation.hpp"
 #include "AnimationWallet.hpp"
 #include "Manifest.hpp"
@@ -20,7 +21,7 @@ static void HelpMarker(const char* desc)
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
     {
         ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.0f);
         ImGui::TextUnformatted(desc);
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
@@ -96,12 +97,15 @@ int main(int argc, char* argv[])
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     //io.Fonts->AddFontDefault();
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("./Born2bSportyV2.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
+
+    imgui_addons::ImGuiFileBrowser file_dialog; // As a class member or globally
 
     // animations size:
     const int image_width = 128;
@@ -110,11 +114,16 @@ int main(int argc, char* argv[])
     char* manifest_content_char = (char*)malloc(sizeof(char) * 1000);
     int manifest_content_max_size = sizeof(char) * 1000;
 
+    //Manifest* manifest = new Manifest(std::string(current_animations_folder) + std::string("/manifest.txt"));
+    //return 0;
+
     // Our state
     int window_width = 1280;
     int window_height = 720;
     bool show_toolbox = false;
     bool show_demo_window = false;
+    float default_font_size = 1.2f;
+    io.FontGlobalScale = 1.2f;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 
     // Main loop
@@ -255,12 +264,12 @@ int main(int argc, char* argv[])
                         animations_wallet->animations.at(current_anim)->reload_animation();
                     ImGui::SameLine();
                     if(ImGui::Button("More"))
-                        ImGui::OpenPopup("Fullscreen Preview");
+                        ImGui::OpenPopup(animations_wallet->animations.at(current_anim)->anim_name.c_str());
                     static int weight = 0;
                     ImGui::SliderInt("Weight", &animations_wallet->animations.at(current_anim)->weight, 0, 14);
-                    // TODO: add weight
+                    // TODO: add leveling
 
-                    if(ImGui::BeginPopupModal("Fullscreen Preview", NULL, ImGuiWindowFlags_NoResize))
+                    if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), NULL, ImGuiWindowFlags_NoResize))
                     {
                         ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
                         if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
@@ -293,7 +302,7 @@ int main(int argc, char* argv[])
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 175.f);
             ImGui::SetWindowFontScale(2.f);
             ImGui::Text("No animation found in selected folder.");
-            ImGui::SetWindowFontScale(1.f);
+            ImGui::SetWindowFontScale(default_font_size);
         }
         ImGui::End();
 
@@ -333,11 +342,23 @@ int main(int argc, char* argv[])
             }
             ImGui::EndMenuBar();
         }
-        if(ImGui::InputText("Dolphin folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
+        ImGui::Text("Dolphin folder:");
+        if(ImGui::InputText("##dolphin_folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
         {
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
         }
+        ImGui::SameLine();
+        if(ImGui::Button("Select"))
+            ImGui::OpenPopup("Select Folder");
+            
+        if(file_dialog.showFileDialog("Select Folder", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT, ImVec2(700, 510)))
+        {
+            strcpy(current_animations_folder, file_dialog.selected_path.c_str());
+            delete(animations_wallet);
+            animations_wallet = new AnimationWallet(current_animations_folder);
+        }
+
         if(ImGui::Button("Load"))
         {
             delete(animations_wallet);

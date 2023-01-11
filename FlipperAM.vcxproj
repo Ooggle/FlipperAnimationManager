@@ -165,6 +165,7 @@
     <ClCompile Include="lib\imgui\backends\imgui_impl_opengl2.cpp" />
     <ClCompile Include="lib\imgui\backends\imgui_impl_sdl.cpp" />
     <ClCompile Include="src\heatshrink_decoder.c" />
+    <ClCompile Include="src\\file_browser\ImGuiFileBrowser.cpp" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationWallet.cpp" />
     <ClCompile Include="src\Manifest.cpp" />
