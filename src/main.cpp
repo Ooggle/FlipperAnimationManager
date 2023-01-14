@@ -114,9 +114,6 @@ int main(int argc, char* argv[])
     char* manifest_content_char = (char*)malloc(sizeof(char) * 1000);
     int manifest_content_max_size = sizeof(char) * 1000;
 
-    //Manifest* manifest = new Manifest(std::string(current_animations_folder) + std::string("/manifest.txt"));
-    //return 0;
-
     // Our state
     int window_width = 1280;
     int window_height = 720;
@@ -321,7 +318,6 @@ int main(int argc, char* argv[])
         {
             if(ImGui::BeginMenu("Menu"))
             {
-                ImGui::MenuItem("(...)", NULL, false, false);
                 ImGui::MenuItem("About");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("About");

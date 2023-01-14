@@ -31,7 +31,13 @@ class Animation
 
     public:
         bool selected = false;
+
+        int min_butthurt = 0;
+        int max_butthurt = 14;
+        int min_level = 1;
+        int max_level = 30;
         int weight = 8;
+
         anim_format format = BM;
         std::string anim_name;
         std::string anim_folder;

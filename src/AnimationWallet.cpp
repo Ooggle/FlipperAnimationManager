@@ -33,6 +33,34 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
                 }
             }
         }
+
+        std::string manifest_path;
+        if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
+            manifest_path = dolphin_path + "Manifest.txt";
+        else
+            manifest_path = dolphin_path + "/" + "manifest.txt";
+
+        // Parsing Manifest.txt
+        Manifest* manifest = new Manifest(manifest_path);
+
+        if(!manifest->is_good) return;
+
+        for(Manifest_animation man_anim: manifest->manifest_animations)
+        {
+            for(Animation* anim: this->animations)
+            {
+                if(anim->anim_name == man_anim.name)
+                {
+                    // apply animation settings from manifest.txt
+                    anim->selected = true;
+                    anim->min_butthurt = man_anim.min_butthurt;
+                    anim->max_butthurt =  man_anim.max_butthurt;
+                    anim->min_level = man_anim.min_level;
+                    anim->max_level =  man_anim.max_level;
+                    anim->weight = man_anim.weight;
+                }
+            }
+        }
     }
     else
         this->is_folder_correct = false;

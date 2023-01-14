@@ -5,6 +5,7 @@
 #include <vector>
 #include <filesystem>
 #include "Animation.hpp"
+#include "Manifest.hpp"
 
 namespace fs = std::filesystem;
 
