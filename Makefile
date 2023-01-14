@@ -26,8 +26,8 @@ OBJS = $(addsuffix .o, $(basename $(SOURCES)))
 UNAME_S := $(shell uname -s)
 
 CXXFLAGS = -std=c++17 -I$(LIB_DIR) -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-#CXXFLAGS += -g -Wall -Wformat
-CXXFLAGS += -g -Wformat# -fsanitize=address,undefined
+CXXFLAGS += -g -Wall -Wformat
+#CXXFLAGS += -g -Wformat# -fsanitize=address,undefined
 LIBS =
 
 ##---------------------------------------------------------------------

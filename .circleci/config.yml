@@ -8,16 +8,18 @@ jobs:
   # Linux Build Job
   buildLinux:
     docker:
-      - image: ubuntu:latest
+      - image: ubuntu:18.04
     steps:
       - checkout
       - run:
           name: Run Linux Build
           command: | # Run apt update, install deps, and make
-            apt-get update && apt-get install libsdl2-dev g++ make -y && make
+            apt-get update && apt-get install libsdl2-dev g++ make -y && make && cd .circleci && ./make_deb.sh
       - store_artifacts:
           path: build/FlipperAM
           destination: FlipperAM_Linux
+      - store_artifacts:
+          path: build/
 
   # Mac Build Job
   buildMac: 

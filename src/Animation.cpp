@@ -190,7 +190,6 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
 
             image_data = (unsigned char*)malloc((1024*8)*4);
             int pos = 0;
-            int col = 0;
             for(int i = 0; i < 1024; i++)
             {
                 for(int j = 0; j < 8; j++)
@@ -223,11 +222,9 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
         else if(buffer[0] == 0)
         {
             good_buffer = buffer + 2;
-            int good_len = len - 2;
 
             image_data = (unsigned char*)malloc((1024*8)*4);
             int pos = 0;
-            int col = 0;
             for(int i = 0; i < 1024; i++)
             {
                 for(int j = 0; j < 8; j++)

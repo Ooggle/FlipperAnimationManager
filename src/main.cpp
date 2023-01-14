@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     const int image_height = 64;
 
     char* manifest_content_char = (char*)malloc(sizeof(char) * 1000);
-    int manifest_content_max_size = sizeof(char) * 1000;
+    long unsigned int manifest_content_max_size = sizeof(char) * 1000;
 
     // Our state
     int window_width = 1280;
@@ -262,7 +262,6 @@ int main(int argc, char* argv[])
                     ImGui::SameLine();
                     if(ImGui::Button("More"))
                         ImGui::OpenPopup(animations_wallet->animations.at(current_anim)->anim_name.c_str());
-                    static int weight = 0;
                     ImGui::SliderInt("Weight", &animations_wallet->animations.at(current_anim)->weight, 0, 14);
                     // TODO: add leveling
 

@@ -61,6 +61,7 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
                 }
             }
         }
+        free(manifest);
     }
     else
         this->is_folder_correct = false;
