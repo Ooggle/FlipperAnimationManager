@@ -8,13 +8,13 @@ jobs:
   # Linux Build Job
   buildLinux:
     docker:
-      - image: ubuntu:18.04
+      - image: debian:bullseye
     steps:
       - checkout
       - run:
           name: Run Linux Build
           command: | # Run apt update, install deps, and make
-            apt-get update && apt-get install libsdl2-dev g++ make -y && make && cd .circleci && ./make_deb.sh
+            apt-get update && apt-get install libsdl2-dev g++ make -y && make && cd .circleci && chmod +x ./make_deb.sh && ./make_deb.sh
       - store_artifacts:
           path: build/FlipperAM
           destination: FlipperAM_Linux
