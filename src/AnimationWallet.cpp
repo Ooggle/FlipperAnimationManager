@@ -36,7 +36,7 @@ AnimationWallet::AnimationWallet(std::string dolphin_path)
 
         std::string manifest_path;
         if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
-            manifest_path = dolphin_path + "Manifest.txt";
+            manifest_path = dolphin_path + "manifest.txt";
         else
             manifest_path = dolphin_path + "/" + "manifest.txt";
 

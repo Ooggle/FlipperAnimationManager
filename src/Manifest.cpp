@@ -13,8 +13,6 @@ Manifest::~Manifest()
 
 void Manifest::load_manifest()
 {
-    printf("%s\n", this->manifest_path.c_str());
-
     std::string line;
     std::ifstream manifest_file;
     manifest_file.open(this->manifest_path.c_str());
