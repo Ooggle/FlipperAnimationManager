@@ -2,6 +2,14 @@
 
 AnimationWallet::AnimationWallet(std::string dolphin_path)
 {
+    this->dolphin_path = dolphin_path;
+    this->load_animations();
+}
+
+void AnimationWallet::load_animations()
+{
+    std::string dolphin_path = this->dolphin_path;
+
     fs::path search_dir = dolphin_path;
     std::error_code ec;
     if(fs::is_directory(search_dir, ec))

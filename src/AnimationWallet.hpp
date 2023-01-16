@@ -17,10 +17,12 @@ class AnimationWallet
 
     private:
         bool is_folder_correct = false;
+        std::string dolphin_path;
 
     public:
         AnimationWallet(std::string dolphin_path = std::string(""));
         ~AnimationWallet();
+        void load_animations();
         void add_animation(std::string anim_folder);
         bool get_is_folder_correct();
 };

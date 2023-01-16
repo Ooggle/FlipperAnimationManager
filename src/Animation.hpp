@@ -39,11 +39,11 @@ class Animation
         int weight = 8;
 
         anim_format format = BM;
-        std::string anim_name;
         std::string anim_folder;
+        std::string anim_name;
 
     private:
-        void load_animation(std::string anim_folder);
+        void load_animation();
         void next_frame();
         bool read_frames_from_files();
         bool LoadImageFromFile(std::string filename, int file_number);

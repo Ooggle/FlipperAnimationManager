@@ -281,7 +281,12 @@ int main(int argc, char* argv[])
                     {
                         ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 255, 255, 20));
                         // update manifest content
-                        manifest_content.append("\nName: " + animations_wallet->animations.at(current_anim)->anim_name + "\nMin butthurt: 0\nMax butthurt: 14\nMin level: 1\nMax level: 30\nWeight: " + std::to_string(animations_wallet->animations.at(current_anim)->weight) + "\n");
+                        manifest_content.append("\nName: " + animations_wallet->animations.at(current_anim)->anim_name + "\nMin butthurt: " +
+                            std::to_string(animations_wallet->animations.at(current_anim)->min_butthurt) + "\nMax butthurt: " +
+                            std::to_string(animations_wallet->animations.at(current_anim)->max_butthurt) + "\nMin level: " +
+                            std::to_string(animations_wallet->animations.at(current_anim)->min_level) + "\nMax level: " +
+                            std::to_string(animations_wallet->animations.at(current_anim)->max_level) + "\nWeight: " +
+                            std::to_string(animations_wallet->animations.at(current_anim)->weight) + "\n");
                     }
 
                     ImGui::PopID();

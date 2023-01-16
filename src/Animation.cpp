@@ -3,17 +3,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Animation::Animation(std::string anim_folder) : anim_folder(anim_folder), anim_name(anim_folder), time_at_last_frame(std::chrono::system_clock::now())
+Animation::Animation(std::string anim_folder) : time_at_last_frame(std::chrono::system_clock::now()), anim_folder(anim_folder), anim_name(anim_folder)
 {
-    this->load_animation(anim_folder);
+    this->load_animation();
 }
 
-Animation::Animation(std::string anim_folder, std::string anim_name) : anim_folder(anim_folder), anim_name(anim_name), time_at_last_frame(std::chrono::system_clock::now())
+Animation::Animation(std::string anim_folder, std::string anim_name) : time_at_last_frame(std::chrono::system_clock::now())
 {
-    this->load_animation(anim_folder);
+    this->anim_folder = anim_folder;
+    this->anim_name = anim_name;
+    this->load_animation();
 }
 
-void Animation::load_animation(std::string anim_folder)
+void Animation::load_animation()
 {
     std::string line;
     std::ifstream meta_file;
@@ -21,7 +23,7 @@ void Animation::load_animation(std::string anim_folder)
     this->total_frames_number = 0;
     this->total_frames_files = 0;
     this->time_at_last_frame = std::chrono::system_clock::now();
-    meta_file.open((anim_folder + std::string("meta.txt")).c_str());
+    meta_file.open((this->anim_folder + std::string("meta.txt")).c_str());
 
     if(!meta_file.is_open()) {
         perror("Error: open meta.txt");
@@ -90,7 +92,7 @@ void Animation::load_animation(std::string anim_folder)
 void Animation::reload_animation()
 {
     this->valid_animation = 0;
-    this->load_animation(this->anim_folder);
+    this->load_animation();
 }
 
 Animation::~Animation()
