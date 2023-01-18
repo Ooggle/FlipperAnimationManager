@@ -15,9 +15,14 @@ void AnimationWallet::load_animations()
     if(fs::is_directory(search_dir, ec))
     {
         this->is_folder_correct = true;
-        for(const auto& entry : fs::directory_iterator(dolphin_path))
+        for(const auto& entry : fs::recursive_directory_iterator(dolphin_path))
         {
-            const auto filenameStr = entry.path().filename().string();
+            std::string full_path = entry.path().string();
+            std::string filenameStr;
+            if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
+                filenameStr = full_path.substr(dolphin_path.length(), full_path.length() - dolphin_path.length());
+            else
+                filenameStr = full_path.substr(dolphin_path.length() + 1, full_path.length() - dolphin_path.length() + 1);
             if(entry.is_directory()) {
                 std::string full_path;
                 fs::path f;
