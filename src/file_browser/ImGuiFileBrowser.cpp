@@ -126,7 +126,8 @@ namespace imgui_addons
         else
             filter_mode = FilterMode_Files | FilterMode_Dirs;
 
-        if (ImGui::BeginPopupModal(label.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+        bool unused_open = true;
+        if (ImGui::BeginPopupModal(label.c_str(), &unused_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
         {
             bool show_error = false;
 
@@ -525,7 +526,7 @@ namespace imgui_addons
         float frame_height = ImGui::GetFrameHeight();
         float frame_height_spacing = ImGui::GetFrameHeightWithSpacing();
         float button_width = (ext_box_width - style.ItemSpacing.x) / 2.0;
-        float buttons_xpos =  pw_size.x - button_width * 2.0 - style.ItemSpacing.x - style.WindowPadding.x;
+        float buttons_xpos =  pw_size.x - button_width * 3.0 - style.ItemSpacing.x - style.WindowPadding.x - 8;
 
         ImGui::SetCursorPosY(pw_size.y - frame_height_spacing - style.WindowPadding.y);
 
@@ -542,6 +543,10 @@ namespace imgui_addons
         //Render an Open Button (in OPEN/SELECT dialog_mode) or Open/Save depending on what's selected in SAVE dialog_mode
         ImGui::SameLine();
         ImGui::SetCursorPosX(buttons_xpos);
+        //Render Cancel Button
+        if (ImGui::Button("Cancel", ImVec2(button_width, 0)))
+            closeDialog();
+        ImGui::SameLine();
         if(dialog_mode == DialogMode::SAVE)
         {
             // If directory selected and Input Text Bar doesn't have focus, render Open Button
@@ -586,11 +591,6 @@ namespace imgui_addons
                 }
             }
         }
-
-        //Render Cancel Button
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(button_width, 0)))
-            closeDialog();
 
         return show_error;
     }

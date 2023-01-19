@@ -74,7 +74,7 @@ void AnimationWallet::load_animations()
                 }
             }
         }
-        free(manifest);
+        delete(manifest);
     }
     else
         this->is_folder_correct = false;

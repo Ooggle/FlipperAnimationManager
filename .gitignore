@@ -32,3 +32,9 @@ bld/
 
 # Visual Studio Code user configuration
 .vscode/
+
+# Object files
+*.o
+
+#Compiled binaries
+FlipperAM
