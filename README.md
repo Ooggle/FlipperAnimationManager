@@ -75,7 +75,7 @@ Download the SDL2 library from [the releases](https://github.com/libsdl-org/SDL/
 Open the `FlipperAM.sln` file with Visual Studio.
 
 Then, go to project settings and replace any %SDL2_DIR% you find in the compiler and linker section by the path of the SDL2 directory previously downloaded. An alternative method is to directly open the FlipperAM.vcxproj file and replace by hand every %SDL2_DIR% by the path of the SDL2 directory.   
-⚠️ If it's not done correclty, the build won't work.
+⚠️ If it's not done correctly, the build won't work.
 
 Select the Release configuration and build the project, the output binary will be located in `Release` folder.
 
