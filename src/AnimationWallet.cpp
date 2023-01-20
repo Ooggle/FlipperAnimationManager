@@ -18,11 +18,24 @@ void AnimationWallet::load_animations()
         for(const auto& entry : fs::recursive_directory_iterator(dolphin_path))
         {
             std::string full_path = entry.path().string();
+
+            // generate animation name as in manifest file
             std::string filenameStr;
             if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
                 filenameStr = full_path.substr(dolphin_path.length(), full_path.length() - dolphin_path.length());
             else
                 filenameStr = full_path.substr(dolphin_path.length() + 1, full_path.length() - dolphin_path.length() + 1);
+            
+            // replace \ by / (for Windows)
+            std::string search = "\\";
+            std::string replace = "/";
+            size_t pos = 0;
+            while((pos = filenameStr.find(search, pos)) != std::string::npos)
+            {
+                filenameStr.replace(pos, search.length(), replace);
+                pos += replace.length();
+            }
+
             if(entry.is_directory()) {
                 std::string full_path;
                 fs::path f;
