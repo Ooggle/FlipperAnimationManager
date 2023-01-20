@@ -67,7 +67,7 @@ void AnimationWallet::load_animations()
             manifest_path = dolphin_path + "/" + "manifest.txt";
 
         // Parsing Manifest.txt
-        Manifest* manifest = new Manifest(manifest_path);
+        this->manifest = new Manifest(manifest_path);
 
         if(!manifest->is_good) return;
 
@@ -87,7 +87,6 @@ void AnimationWallet::load_animations()
                 }
             }
         }
-        delete(manifest);
     }
     else
         this->is_folder_correct = false;
@@ -97,6 +96,7 @@ AnimationWallet::~AnimationWallet()
 {
     for(Animation* anim: this->animations)
         delete(anim);
+    delete(manifest);
 }
 
 void AnimationWallet::add_animation(std::string anim_folder)
@@ -116,4 +116,9 @@ void AnimationWallet::add_animation(std::string anim_folder)
 bool AnimationWallet::get_is_folder_correct()
 {
     return this->is_folder_correct;
+}
+
+bool AnimationWallet::update_manifest(std::string file_content)
+{
+    return this->manifest->update_manifest(file_content);
 }

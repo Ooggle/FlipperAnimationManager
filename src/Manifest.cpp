@@ -21,6 +21,7 @@ void Manifest::load_manifest()
         perror("Error: open manifest.txt");
         return;
     }
+    this->good_path = true;
     
     // check filetype and version
     if(!getline(manifest_file, line)) {manifest_file.close(); return;}
@@ -78,4 +79,23 @@ void Manifest::load_manifest()
         this->is_good = false;
     else
         this->is_good = true;
+}
+
+bool Manifest::update_manifest(std::string file_content)
+{
+    if(this->good_path == false)
+        return false;
+
+    std::ofstream manifest_file;
+    manifest_file.open(this->manifest_path.c_str());
+
+    if(!manifest_file.is_open()) {
+        perror("Error: open manifest.txt");
+        return false;
+    }
+
+    manifest_file.write(file_content.c_str(), file_content.size());
+
+    manifest_file.close();
+    return true;
 }

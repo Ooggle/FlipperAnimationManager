@@ -69,8 +69,6 @@ int main(int argc, char* argv[])
 
     AnimationWallet* animations_wallet = new AnimationWallet(current_animations_folder);
 
-    // TODO: Manifest reader
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -243,8 +241,8 @@ int main(int argc, char* argv[])
                         {
                             ImGui::BeginTooltip();
                             ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                            // TODO: finish description
-                            ImGui::TextUnformatted(".png files...");
+                            // TODO: Better description?
+                            ImGui::TextUnformatted(".png files. This is only a preview, this animation needs to be compiled first before being added to the Flipper Zero.");
                             ImGui::PopTextWrapPos();
                             ImGui::EndTooltip();
                         }
@@ -390,7 +388,19 @@ int main(int argc, char* argv[])
             strcpy(manifest_content_char, manifest_content.c_str());
         }
         ImGui::InputTextMultiline("##source", manifest_content_char, manifest_content.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 40), ImGuiInputTextFlags_ReadOnly);
-        if(ImGui::Button("Copy Manifest to clipboard"))
+        if(ImGui::Button("Save manifest.txt"))
+        {
+            if(animations_wallet->update_manifest(manifest_content))
+            {
+                // TODO: show saved success message
+            }
+            else
+            {
+                // TODO: show failure message
+            }
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Copy to clipboard"))
         {
             ImGui::SetClipboardText(manifest_content_char);
             // TODO: show copied to clipboard message

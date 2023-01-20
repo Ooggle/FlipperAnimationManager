@@ -21,6 +21,7 @@ class Manifest
 {
     public:
         std::string manifest_path;
+        bool good_path = false;
         bool is_good = false;
         std::vector<Manifest_animation> manifest_animations;
 
@@ -30,6 +31,7 @@ class Manifest
         Manifest(std::string manifest_path);
         ~Manifest();
         void load_manifest();
+        bool update_manifest(std::string file_content);
 };
 
 #endif
