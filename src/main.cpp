@@ -32,7 +32,7 @@ static void HelpMarker(const char* desc)
 int main(int argc, char* argv[])
 {
     const int version_major = 1;
-    const int version_minor = 1;
+    const int version_minor = 2;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
