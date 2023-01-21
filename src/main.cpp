@@ -117,6 +117,7 @@ int main(int argc, char* argv[])
     int window_height = 720;
     bool show_toolbox = false;
     bool show_demo_window = false;
+    bool theater_mode = false;
     float default_font_size = 1.2f;
     io.FontGlobalScale = 1.2f;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
@@ -124,7 +125,7 @@ int main(int argc, char* argv[])
     // Main loop
     bool done = false;
     bool first_cycle = true;
-    while (!done)
+    while(!done)
     {
         std::string manifest_content = "Filetype: Flipper Animation Manifest\nVersion: 1\n";
         // Poll and handle events (inputs, window resize, etc.)
@@ -133,7 +134,7 @@ int main(int argc, char* argv[])
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
-        while (SDL_PollEvent(&event))
+        while(SDL_PollEvent(&event))
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if(event.type == SDL_QUIT)
@@ -177,26 +178,29 @@ int main(int argc, char* argv[])
                     );
         if(animations_wallet->animations_number != 0)
         {
-            if(ImGui::Button("Select all"))
+            if(!theater_mode)
             {
-                int current_anim = 0;
-                while(current_anim < animations_wallet->animations_number)
+                if(ImGui::Button("Select all"))
                 {
-                    animations_wallet->animations.at(current_anim)->selected = true;
-                    current_anim+= 1;
+                    int current_anim = 0;
+                    while(current_anim < animations_wallet->animations_number)
+                    {
+                        animations_wallet->animations.at(current_anim)->selected = true;
+                        current_anim+= 1;
+                    }
                 }
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Deselect all"))
-            {
-                int current_anim = 0;
-                while(current_anim < animations_wallet->animations_number)
+                ImGui::SameLine();
+                if(ImGui::Button("Deselect all"))
                 {
-                    animations_wallet->animations.at(current_anim)->selected = false;
-                    current_anim+= 1;
+                    int current_anim = 0;
+                    while(current_anim < animations_wallet->animations_number)
+                    {
+                        animations_wallet->animations.at(current_anim)->selected = false;
+                        current_anim+= 1;
+                    }
                 }
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
             }
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
             int row_num = 1 + ((window_width - 850) / 420);
 
@@ -213,38 +217,41 @@ int main(int argc, char* argv[])
                     ImGui::BeginGroup();
                     ImGui::PushID(current_anim);
                     ImGui::Text("%s", animations_wallet->animations.at(current_anim)->anim_name.c_str());
-                    ImGui::SameLine();
-                    if(animations_wallet->animations.at(current_anim)->format == BM)
+                    if(!theater_mode)
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::Button("bm");
-                        ImGui::PopStyleColor(3);
-                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                        ImGui::SameLine();
+                        if(animations_wallet->animations.at(current_anim)->format == BM)
                         {
-                            ImGui::BeginTooltip();
-                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                            ImGui::TextUnformatted(".bm files represents compiled animation files that can directly be used by the Flipper Zero.");
-                            ImGui::PopTextWrapPos();
-                            ImGui::EndTooltip();
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::Button("bm");
+                            ImGui::PopStyleColor(3);
+                            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                            {
+                                ImGui::BeginTooltip();
+                                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                                ImGui::TextUnformatted(".bm files represents compiled animation files that can directly be used by the Flipper Zero.");
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
+                            }
                         }
-                    }
-                    else if(animations_wallet->animations.at(current_anim)->format == PNG)
-                    {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
-                        ImGui::Button("png");
-                        ImGui::PopStyleColor(3);
-                        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                        else if(animations_wallet->animations.at(current_anim)->format == PNG)
                         {
-                            ImGui::BeginTooltip();
-                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                            // TODO: Better description?
-                            ImGui::TextUnformatted(".png files. This is only a preview, this animation needs to be compiled first before being added to the Flipper Zero.");
-                            ImGui::PopTextWrapPos();
-                            ImGui::EndTooltip();
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
+                            ImGui::Button("png");
+                            ImGui::PopStyleColor(3);
+                            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                            {
+                                ImGui::BeginTooltip();
+                                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                                // TODO: Better description?
+                                ImGui::TextUnformatted(".png files. This is only a preview, this animation needs to be compiled first before being added to the Flipper Zero.");
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
+                            }
                         }
                     }
                     
@@ -253,15 +260,18 @@ int main(int argc, char* argv[])
                     {
                         animations_wallet->animations.at(current_anim)->selected^= 1;
                     }
-                    ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
-                    ImGui::SameLine();
-                    if(ImGui::Button("Reload"))
-                        animations_wallet->animations.at(current_anim)->reload_animation();
-                    ImGui::SameLine();
-                    if(ImGui::Button("More"))
-                        ImGui::OpenPopup(animations_wallet->animations.at(current_anim)->anim_name.c_str());
-                    ImGui::SliderInt("Weight", &animations_wallet->animations.at(current_anim)->weight, 0, 14);
-                    // TODO: add leveling
+                    if(!theater_mode)
+                    {
+                        ImGui::Checkbox("Use This Animation", &animations_wallet->animations.at(current_anim)->selected);
+                        ImGui::SameLine();
+                        if(ImGui::Button("Reload"))
+                            animations_wallet->animations.at(current_anim)->reload_animation();
+                        ImGui::SameLine();
+                        if(ImGui::Button("More"))
+                            ImGui::OpenPopup(animations_wallet->animations.at(current_anim)->anim_name.c_str());
+                        ImGui::SliderInt("Weight", &animations_wallet->animations.at(current_anim)->weight, 0, 14);
+                        // TODO: add leveling
+                    }
 
                     if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), NULL, ImGuiWindowFlags_NoResize))
                     {
@@ -320,6 +330,8 @@ int main(int argc, char* argv[])
         {
             if(ImGui::BeginMenu("Menu"))
             {
+                ImGui::Checkbox("Minimal UI Mode", &theater_mode);
+
                 ImGui::MenuItem("About");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("About");
@@ -372,38 +384,41 @@ int main(int argc, char* argv[])
             HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm or .png files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
         }
 
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-        ImGui::Separator();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+        if(!theater_mode)
+        {
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+            ImGui::Separator();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-        ImGui::Text("Manifest.txt");
-        if(strcmp(manifest_content_char, manifest_content.c_str()))
-        {
-            // Not very pretty but it will remain like that until I found something better without abusing (re)allocations
-            while(sizeof(char) * manifest_content.size() > manifest_content_max_size)
+            ImGui::Text("Manifest.txt");
+            if(strcmp(manifest_content_char, manifest_content.c_str()))
             {
-                manifest_content_max_size+= sizeof(char) * 1000;
-                manifest_content_char = (char*)realloc(manifest_content_char, manifest_content_max_size);
+                // Not very pretty but it will remain like that until I found something better without abusing (re)allocations
+                while(sizeof(char) * manifest_content.size() > manifest_content_max_size)
+                {
+                    manifest_content_max_size+= sizeof(char) * 1000;
+                    manifest_content_char = (char*)realloc(manifest_content_char, manifest_content_max_size);
+                }
+                strcpy(manifest_content_char, manifest_content.c_str());
             }
-            strcpy(manifest_content_char, manifest_content.c_str());
-        }
-        ImGui::InputTextMultiline("##source", manifest_content_char, manifest_content.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 40), ImGuiInputTextFlags_ReadOnly);
-        if(ImGui::Button("Save manifest.txt"))
-        {
-            if(animations_wallet->update_manifest(manifest_content))
+            ImGui::InputTextMultiline("##source", manifest_content_char, manifest_content.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 40), ImGuiInputTextFlags_ReadOnly);
+            if(ImGui::Button("Save manifest.txt"))
             {
-                // TODO: show saved success message
+                if(animations_wallet->update_manifest(manifest_content))
+                {
+                    // TODO: show saved success message
+                }
+                else
+                {
+                    // TODO: show failure message
+                }
             }
-            else
+            ImGui::SameLine();
+            if(ImGui::Button("Copy to clipboard"))
             {
-                // TODO: show failure message
+                ImGui::SetClipboardText(manifest_content_char);
+                // TODO: show copied to clipboard message
             }
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Copy to clipboard"))
-        {
-            ImGui::SetClipboardText(manifest_content_char);
-            // TODO: show copied to clipboard message
         }
         ImGui::End();
 
