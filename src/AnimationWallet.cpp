@@ -68,10 +68,11 @@ void AnimationWallet::load_animations()
 
         // Parsing Manifest.txt
         this->manifest = new Manifest(manifest_path);
+        this->manifest_created = true;
 
-        if(!manifest->is_good) return;
+        if(!this->manifest->is_good) return;
 
-        for(Manifest_animation man_anim: manifest->manifest_animations)
+        for(Manifest_animation man_anim: this->manifest->manifest_animations)
         {
             for(Animation* anim: this->animations)
             {
@@ -96,7 +97,8 @@ AnimationWallet::~AnimationWallet()
 {
     for(Animation* anim: this->animations)
         delete(anim);
-    delete(manifest);
+    if(this->manifest_created)
+        delete(this->manifest);
 }
 
 void AnimationWallet::add_animation(std::string anim_folder)

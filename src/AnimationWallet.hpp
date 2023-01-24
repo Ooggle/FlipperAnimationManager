@@ -15,6 +15,7 @@ class AnimationWallet
         int animations_number = 0;
         std::vector<Animation*> animations;
         Manifest* manifest;
+        bool manifest_created = false;
 
     private:
         bool is_folder_correct = false;

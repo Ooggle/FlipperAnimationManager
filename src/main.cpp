@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
 {
     const int version_major = 1;
     const int version_minor = 2;
+    const int version_patch = 1;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -338,7 +339,7 @@ int main(int argc, char* argv[])
                 
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
                 {
-                    ImGui::Text("Flipper-Zero Animation Manager v%d.%d", version_major, version_minor);
+                    ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Text("Made with <3 by Ooggle");
                     ImGui::Text("https://github.com/Ooggle/FlipperAnimationManager"); // TODO: clickable link
@@ -376,7 +377,7 @@ int main(int argc, char* argv[])
         }
         ImGui::SameLine();
         if(animations_wallet->get_is_folder_correct())
-            ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.00f), "Sucess, %d animations loaded", animations_wallet->animations_number);
+            ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.00f), "Success, %d animations loaded", animations_wallet->animations_number);
         else
         {
             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.00f), "Failed, folder not found");
