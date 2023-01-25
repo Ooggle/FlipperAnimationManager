@@ -120,6 +120,7 @@ int main(int argc, char* argv[])
     bool show_demo_window = false;
     bool theater_mode = false;
     float default_font_size = 1.2f;
+    bool animation_wallet_loaded = false;
     io.FontGlobalScale = 1.2f;
     ImVec4 clear_color = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 
@@ -356,15 +357,49 @@ int main(int argc, char* argv[])
         ImGui::Text("Dolphin folder:");
         if(ImGui::InputText("##dolphin_folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
         {
+            animation_wallet_loaded = false;
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
+        }
+        if(!animation_wallet_loaded)
+        {
+            if(!animations_wallet->is_finished_loading())
+                animations_wallet->load_new_animation();
+            else
+            {
+                animation_wallet_loaded = true;
+                animations_wallet->parse_manifest();
+            }
         }
         ImGui::SameLine();
         if(ImGui::Button("Select"))
             ImGui::OpenPopup("Select Folder");
+        
+        if(!animation_wallet_loaded)
+        {
+            ImGui::OpenPopup("Loading animations popup");
+        }
+        ImGui::SetNextWindowSize({700, 50});
+        if(ImGui::BeginPopupModal("Loading animations popup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar/*  | ImGuiWindowFlags_NoBackground */))
+        {
+            if(animation_wallet_loaded)
+                ImGui::CloseCurrentPopup();
+            ImGui::SetWindowFontScale(2.f);
+            std::string load_text = "Loading animations... " + std::to_string(animations_wallet->animations_number);
+
+            float windowWidth = ImGui::GetWindowSize().x;
+            float textWidth = ImGui::CalcTextSize(load_text.c_str()).x;
+
+            ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+            ImGui::Text("%s", load_text.c_str());
+
+            ImGui::SetWindowFontScale(default_font_size);
+            ImGui::EndPopup();
+        }
             
         if(file_dialog.showFileDialog("Select Folder", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT, ImVec2(700, 510)))
         {
+            animation_wallet_loaded = false;
             strcpy(current_animations_folder, file_dialog.selected_path.c_str());
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
@@ -372,6 +407,7 @@ int main(int argc, char* argv[])
 
         if(ImGui::Button("Load"))
         {
+            animation_wallet_loaded = false;
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
         }

@@ -46,7 +46,9 @@ void AnimationWallet::load_animations()
                 f = full_path + "meta.txt";
                 if(fs::exists(f))
                 {
-                    Animation* anim = new Animation(full_path, filenameStr);
+                    // temporarily store animation path and name for future loading
+                    this->animations_names_temp.push_back(std::make_pair(full_path, filenameStr));
+                    /* Animation* anim = new Animation(full_path, filenameStr);
                     if(anim->is_valid())
                     {
                         this->animations.push_back(anim);
@@ -55,39 +57,15 @@ void AnimationWallet::load_animations()
                     else
                     {
                         delete(anim);
-                    }
+                    } */
                 }
             }
         }
 
-        std::string manifest_path;
         if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
-            manifest_path = dolphin_path + "manifest.txt";
+            this->manifest_path = dolphin_path + "manifest.txt";
         else
-            manifest_path = dolphin_path + "/" + "manifest.txt";
-
-        // Parsing Manifest.txt
-        this->manifest = new Manifest(manifest_path);
-        this->manifest_created = true;
-
-        if(!this->manifest->is_good) return;
-
-        for(Manifest_animation man_anim: this->manifest->manifest_animations)
-        {
-            for(Animation* anim: this->animations)
-            {
-                if(anim->anim_name == man_anim.name)
-                {
-                    // apply animation settings from manifest.txt
-                    anim->selected = true;
-                    anim->min_butthurt = man_anim.min_butthurt;
-                    anim->max_butthurt =  man_anim.max_butthurt;
-                    anim->min_level = man_anim.min_level;
-                    anim->max_level =  man_anim.max_level;
-                    anim->weight = man_anim.weight;
-                }
-            }
-        }
+            this->manifest_path = dolphin_path + "/" + "manifest.txt";
     }
     else
         this->is_folder_correct = false;
@@ -101,9 +79,9 @@ AnimationWallet::~AnimationWallet()
         delete(this->manifest);
 }
 
-void AnimationWallet::add_animation(std::string anim_folder)
+void AnimationWallet::add_animation(std::string anim_folder, std::string anim_name)
 {
-    Animation* anim = new Animation(anim_folder);
+    Animation* anim = new Animation(anim_folder, anim_name);
     if(anim->is_valid())
     {
         this->animations.push_back(anim);
@@ -115,6 +93,32 @@ void AnimationWallet::add_animation(std::string anim_folder)
     }
 }
 
+void AnimationWallet::parse_manifest()
+{
+    // Parsing Manifest.txt
+    this->manifest = new Manifest(this->manifest_path);
+    this->manifest_created = true;
+
+    if (!this->manifest->is_good) return;
+
+    for (Manifest_animation man_anim : this->manifest->manifest_animations)
+    {
+        for (Animation* anim : this->animations)
+        {
+            if (anim->anim_name == man_anim.name)
+            {
+                // apply animation settings from manifest.txt
+                anim->selected = true;
+                anim->min_butthurt = man_anim.min_butthurt;
+                anim->max_butthurt = man_anim.max_butthurt;
+                anim->min_level = man_anim.min_level;
+                anim->max_level = man_anim.max_level;
+                anim->weight = man_anim.weight;
+            }
+        }
+    }
+}
+
 bool AnimationWallet::get_is_folder_correct()
 {
     return this->is_folder_correct;
@@ -123,4 +127,18 @@ bool AnimationWallet::get_is_folder_correct()
 bool AnimationWallet::update_manifest(std::string file_content)
 {
     return this->manifest->update_manifest(file_content);
+}
+
+bool AnimationWallet::is_finished_loading()
+{
+    return this->number_animations_loaded == (int)this->animations_names_temp.size();
+}
+
+void AnimationWallet::load_new_animation()
+{
+    if(this->is_finished_loading())
+        return;
+    
+    this->add_animation(this->animations_names_temp.at(this->number_animations_loaded).first, this->animations_names_temp.at(this->number_animations_loaded).second);
+    this->number_animations_loaded+= 1;
 }

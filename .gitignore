@@ -38,3 +38,6 @@ bld/
 
 #Compiled binaries
 FlipperAM
+
+# SDL2.dll
+SDL2.dll
