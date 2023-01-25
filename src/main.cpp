@@ -8,7 +8,13 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
-//#include <unistd.h>
+
+// for system()
+#include <stdlib.h>
+
+#ifdef _WIN32
+#include <shellapi.h>
+#endif
 
 extern "C" {
     #include "heatshrink_decoder.h"
@@ -229,7 +235,7 @@ int main(int argc, char* argv[])
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
                             ImGui::Button("bm");
                             ImGui::PopStyleColor(3);
-                            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                            if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                             {
                                 ImGui::BeginTooltip();
                                 ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -245,7 +251,7 @@ int main(int argc, char* argv[])
                             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.f));
                             ImGui::Button("png");
                             ImGui::PopStyleColor(3);
-                            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                            if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                             {
                                 ImGui::BeginTooltip();
                                 ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -309,8 +315,8 @@ int main(int argc, char* argv[])
         }
         else
         {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 320.f);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 175.f);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ((window_height - 100) / 2));
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 70.f + ((window_width - 850) / 2));
             ImGui::SetWindowFontScale(2.f);
             ImGui::Text("No animation found in selected folder.");
             ImGui::SetWindowFontScale(default_font_size);
@@ -343,7 +349,31 @@ int main(int argc, char* argv[])
                     ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Text("Made with <3 by Ooggle");
-                    ImGui::Text("https://github.com/Ooggle/FlipperAnimationManager"); // TODO: clickable link
+                    ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager"); // TODO: clickable link
+                    if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted("Open link");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+                    if(ImGui::IsItemClicked())
+                    {
+                        std::string github_link = "https://github.com/Ooggle/FlipperAnimationManager";
+
+                        #ifdef _WIN32
+                        ShellExecuteA(NULL, "open", github_link.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+                        #else
+                        #if __APPLE__
+                        std::string command_macos = std::string("open \"") + github_link.c_str() + std::string("\"");
+                        system(command_macos.c_str());
+                        #else
+                        std::string command_linux = std::string("xdg-open \"") + github_link.c_str() + std::string("\"");
+                        system(command_linux.c_str());
+                        #endif
+                        #endif
+                    }
                     ImGui::Separator();
                     if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
                         ImGui::CloseCurrentPopup();
