@@ -89,6 +89,7 @@ void AnimationWallet::add_animation(std::string anim_folder, std::string anim_na
     }
     else
     {
+        this->errored_animations.push_back(anim_folder);
         delete(anim);
     }
 }

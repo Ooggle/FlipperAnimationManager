@@ -344,12 +344,17 @@ int main(int argc, char* argv[])
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("About");
                 
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
                 {
+                    ImGui::PopStyleVar();
                     ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Text("Made with <3 by Ooggle");
-                    ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager"); // TODO: clickable link
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.3f, 0.3f, 0.3f, 0.2f});
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.7f, 0.4f, 0.1f, 0.3f});
+                    ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager");
+                    ImGui::PopStyleColor(2);
                     if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                     {
                         ImGui::BeginTooltip();
@@ -374,11 +379,15 @@ int main(int argc, char* argv[])
                         #endif
                         #endif
                     }
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Separator();
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
                         ImGui::CloseCurrentPopup();
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
                     ImGui::EndPopup();
                 }
+                ImGui::PopStyleVar();
                 ImGui::MenuItem("Quit", "Alt+F4", &done);
                 ImGui::EndMenu();
             }
@@ -410,7 +419,7 @@ int main(int argc, char* argv[])
             ImGui::OpenPopup("Loading animations popup");
         }
         ImGui::SetNextWindowSize({700, 50});
-        if(ImGui::BeginPopupModal("Loading animations popup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar/*  | ImGuiWindowFlags_NoBackground */))
+        if(ImGui::BeginPopupModal("Loading animations popup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar))
         {
             if(animation_wallet_loaded)
                 ImGui::CloseCurrentPopup();
@@ -449,6 +458,35 @@ int main(int argc, char* argv[])
             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.00f), "Failed, folder not found");
             ImGui::SameLine();
             HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm or .png files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
+        }
+
+        // show animations errors if necessary
+        if(animations_wallet->errored_animations.size() > 0)
+        {
+            std::string btn_errors_string = std::to_string(animations_wallet->errored_animations.size()) + ((animations_wallet->errored_animations.size() == 1) ? std::string(" error") : std::string(" errors"));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.3f, 0.4f, 1.0f});
+            if(ImGui::Button(btn_errors_string.c_str()))
+                ImGui::OpenPopup("Errored animations");
+            ImGui::PopStyleColor(1);
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+            bool open_popup = true;
+            if(ImGui::BeginPopupModal("Errored animations", &open_popup, ImGuiWindowFlags_NoResize))
+            {
+                ImGui::Text("The following animations did not load due to error:");
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.f);
+                for(std::string anim_error: animations_wallet->errored_animations)
+                {
+                    ImGui::Text("%s", anim_error.c_str());
+                }
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                ImGui::Separator();
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
+            ImGui::PopStyleVar();
         }
 
         if(!theater_mode)

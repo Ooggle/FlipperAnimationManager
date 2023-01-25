@@ -16,6 +16,7 @@ class AnimationWallet
         int animations_number = 0;
         std::vector<Animation*> animations;
         std::string manifest_path;
+        std::vector<std::string> errored_animations;
         Manifest* manifest;
         bool manifest_created = false;
 
