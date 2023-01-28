@@ -281,6 +281,7 @@ int main(int argc, char* argv[])
                         // TODO: add leveling
                     }
 
+                    // popup modal for animation preview
                     if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), NULL, ImGuiWindowFlags_NoResize))
                     {
                         ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));

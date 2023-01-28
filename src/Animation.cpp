@@ -304,7 +304,7 @@ GLuint Animation::get_frame()
         this->time_at_last_frame = end;
         this->next_frame();
     }
-    return this->frames[this->current_frame_number];
+    return this->frames[this->frames_order[this->current_frame_number]];
 }
 
 bool Animation::is_valid()
