@@ -87,7 +87,7 @@ bool Manifest::update_manifest(std::string file_content)
         return false;
 
     std::ofstream manifest_file;
-    manifest_file.open(this->manifest_path.c_str());
+    manifest_file.open(this->manifest_path.c_str(), std::ofstream::out | std::ofstream::trunc);
 
     if(!manifest_file.is_open()) {
         perror("Error: open manifest.txt");
