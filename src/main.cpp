@@ -151,8 +151,7 @@ int main(int argc, char* argv[])
                 done = true;
             if(event.window.event == SDL_WINDOWEVENT_RESIZED)
             {
-                window_width = SDL_GetWindowSurface(window)->w;
-                window_height = SDL_GetWindowSurface(window)->h;
+                SDL_GetWindowSize(window, &window_width, &window_height);
             }
         }
 
