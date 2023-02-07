@@ -83,8 +83,8 @@ void Manifest::load_manifest()
 
 bool Manifest::update_manifest(std::string file_content)
 {
-    if(this->good_path == false)
-        return false;
+    /* if(this->good_path == false)
+        return false; */
 
     std::ofstream manifest_file;
     manifest_file.open(this->manifest_path.c_str(), std::ofstream::out | std::ofstream::trunc);

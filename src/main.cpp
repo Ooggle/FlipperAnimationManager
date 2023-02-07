@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
+        // TODO: remove this window by default
         ImGui::SetNextWindowPos({0, 690 + ((float)window_height - 720)});
         ImGui::SetNextWindowSize({400, 30});
         ImGui::Begin("Framerate Window",
@@ -289,6 +290,30 @@ int main(int argc, char* argv[])
                         ImGui::SameLine();
                         if(ImGui::Button("Reload animation"))
                             animations_wallet->animations.at(current_anim)->reload_animation();
+                        ImGui::SameLine();
+                        if(animations_wallet->animations.at(current_anim)->format == PNG)
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{1.f, 0.5f, 0.f, 0.7f});
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{1.f, 0.5f, 0.f, 0.9f});
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{1.f, 0.5f, 0.f, 1.f});
+                            if(ImGui::Button("Compile animation for Flipper (beta)"))
+                            {
+                                animations_wallet->animations.at(current_anim)->export_to_bm();
+                                ImGui::OpenPopup("exported_to_bm");
+                            }
+                            ImGui::PopStyleColor(3);
+                            //ImGui::SetNextWindowSize({700, 50});
+                            if(ImGui::BeginPopupModal("exported_to_bm", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar))
+                            {
+                                ImGui::SetWindowFontScale(1.5f);
+                                ImGui::Text("Exported to folder:");
+                                ImGui::Text("%s_compiled/", animations_wallet->animations.at(current_anim)->anim_folder.substr(0, animations_wallet->animations.at(current_anim)->anim_folder.length() - 1).c_str());
+                                if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                                    ImGui::CloseCurrentPopup();
+                                ImGui::SetWindowFontScale(default_font_size);
+                                ImGui::EndPopup();
+                            }
+                        }
                         ImGui::SameLine();
                         ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
                         ImGui::EndPopup();
@@ -424,7 +449,7 @@ int main(int argc, char* argv[])
             if(animation_wallet_loaded)
                 ImGui::CloseCurrentPopup();
             ImGui::SetWindowFontScale(2.f);
-            std::string load_text = "Loading animations... " + std::to_string(animations_wallet->animations_number);
+            std::string load_text = "Loading animations... " + std::to_string(animations_wallet->animations_number) + std::string("/") + std::to_string(animations_wallet->total_animations__loading);
 
             float windowWidth = ImGui::GetWindowSize().x;
             float textWidth = ImGui::CalcTextSize(load_text.c_str()).x;
@@ -463,7 +488,7 @@ int main(int argc, char* argv[])
         // show animations errors if necessary
         if(animations_wallet->errored_animations.size() > 0)
         {
-            std::string btn_errors_string = std::to_string(animations_wallet->errored_animations.size()) + ((animations_wallet->errored_animations.size() == 1) ? std::string(" error") : std::string(" errors"));
+            std::string btn_errors_string = std::to_string(animations_wallet->errored_animations.size()) + ((animations_wallet->errored_animations.size() == 1) ? std::string(" error") : std::string(" errors!"));
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.3f, 0.4f, 1.0f});
             if(ImGui::Button(btn_errors_string.c_str()))
                 ImGui::OpenPopup("Errored animations");

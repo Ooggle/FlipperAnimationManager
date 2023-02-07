@@ -85,7 +85,7 @@ void Animation::load_animation()
         this->valid_animation = 1;
     else
     {
-        printf("Error for animation %s\n", anim_folder.c_str());
+        //printf("Error for animation %s\n", anim_folder.c_str());
     }
 }
 
@@ -97,9 +97,19 @@ void Animation::reload_animation()
 
 Animation::~Animation()
 {
-    // TODO: delete textures before someone detect that there is a little leakage of memory
+    // TODO: delete textures before someone detect that there is a little leakage of memory GPU side
     if(this->frames != NULL)
         free(this->frames);
+    if(this->frames_pixels != NULL)
+    {
+        for(int i = 0; i < this->total_frames_files; i++)
+        {
+            if(this->frames_pixels[i] != 0)
+            {
+                free(this->frames_pixels[i]);
+            }
+        }
+    }
 }
 
 void Animation::next_frame()
@@ -137,6 +147,8 @@ bool Animation::read_frames_from_files()
 
     // if a good format is found, proceed to load the files into textures
     this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
+    this->frames_pixels = (unsigned char**)malloc(this->total_frames_files * sizeof(unsigned char*));
+    memset(this->frames_pixels, 0, this->total_frames_files * sizeof(unsigned char*));
     for(int i = 0; i < this->total_frames_files; i++)
     {
         if(!this->LoadImageFromFile(this->anim_folder + "frame_" + std::to_string(i), i))
@@ -192,7 +204,9 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
 
             image_data = (unsigned char*)malloc((1024*8)*4);
             int pos = 0;
-            for(int i = 0; i < 1024; i++)
+            // 1024: (128*64) / 8
+            int count_bytes = (image_width * image_height) / 8;
+            for(int i = 0; i < count_bytes; i++)
             {
                 for(int j = 0; j < 8; j++)
                 {
@@ -223,7 +237,7 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
         }
         else if(buffer[0] == 0)
         {
-            good_buffer = buffer + 2;
+            good_buffer = buffer + 1;
 
             image_data = (unsigned char*)malloc((1024*8)*4);
             int pos = 0;
@@ -288,8 +302,9 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    free(image_data);
+    //free(image_data);
 
+    this->frames_pixels[file_number] = image_data;
     this->frames[file_number] = image_texture;
 
     return true;
@@ -330,4 +345,70 @@ int Animation::get_total_frames_files()
 int Animation::get_weight()
 {
     return this->weight;
+}
+
+void Animation::export_to_bm()
+{
+    if(this->format == BM)
+        return;
+
+    std::string export_path = this->anim_folder.substr(0, this->anim_folder.length() - 1) + std::string("_compiled");
+    std::filesystem::create_directory(export_path);
+    std::filesystem::copy_file(this->anim_folder + std::string("meta.txt"), export_path + std::string("/meta.txt"));
+
+    int image_width = 128;
+    int image_height = 64;
+
+    for(int f = 0; f < this->total_frames_files; f++)
+    {
+        unsigned char* bm_frame = (unsigned char*)malloc(((image_width * image_height) / 8) + 1);
+        bm_frame[0] = 0;
+        int bm_frame_pos = 1;
+
+        int L, P;
+        int pixel_pos = 0;
+        unsigned char byte_buffer = 0;
+        int byte_buffer_count = 0;
+        int count_bytes = (image_width * image_height) * 4;
+        for(pixel_pos = 0; pixel_pos < count_bytes; pixel_pos+= 4)
+        {
+            // for each pixel
+
+            // turn an RGB color into grayscale based on the luminosity of each primary colors, don't ask me why, I took it from here:
+            // https://github.com/python-pillow/Pillow/blob/main/src/PIL/Image.py#L905
+            L = this->frames_pixels[f][pixel_pos] * 299/1000 +
+                this->frames_pixels[f][pixel_pos+1] * 587/1000 +
+                this->frames_pixels[f][pixel_pos+2] * 114/1000;
+            // i'm inverting black and white while converting to bitmap for optimization sake
+            if(L > 127)
+                P = 0;
+            else
+                P = 1;
+
+            byte_buffer+= P << byte_buffer_count;
+            byte_buffer_count+= 1;
+
+            if(byte_buffer_count == 8)
+            {
+                // push the completed byte to the output array
+                bm_frame[bm_frame_pos] = byte_buffer;
+                byte_buffer = 0;
+                bm_frame_pos+= 1;
+                byte_buffer_count = 0;
+            }
+        }
+        std::ofstream manifest_file;
+        manifest_file.open((export_path + std::string("/frame_") + std::to_string(f) + std::string(".bm")).c_str(), std::ofstream::out | std::ofstream::trunc);
+
+        if(!manifest_file.is_open()) {
+            perror("Error: open frame");
+            break;
+        }
+
+        // TODO: add the lzss heatshrink compression to final frame and check if it's size is larger or not than the original uncompressed frame:
+        // https://github.com/flipperdevices/flipperzero-firmware/blob/dev/scripts/flipper/assets/icon.py#L107
+        manifest_file.write((const char *)bm_frame, ((image_width * image_height) / 8) + 1);
+
+        manifest_file.close();
+    }
 }

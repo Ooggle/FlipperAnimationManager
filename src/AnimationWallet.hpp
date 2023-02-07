@@ -14,6 +14,7 @@ class AnimationWallet
 {
     public:
         int animations_number = 0;
+        int total_animations__loading = 0;
         std::vector<Animation*> animations;
         std::string manifest_path;
         std::vector<std::string> errored_animations;

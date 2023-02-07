@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #include <SDL_opengl.h>
 
 extern "C" {
@@ -25,6 +26,7 @@ class Animation
         int total_frames_number = 0;
         int total_frames_files = 0;
         GLuint* frames = NULL;
+        unsigned char** frames_pixels = NULL;
         float time_per_frame;
         std::vector<int> frames_order;
         std::chrono::system_clock::time_point time_at_last_frame;
@@ -59,6 +61,7 @@ class Animation
         int get_total_frames_number();
         int get_total_frames_files();
         int get_weight();
+        void export_to_bm();
 };
 
 #endif

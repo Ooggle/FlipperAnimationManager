@@ -62,6 +62,8 @@ void AnimationWallet::load_animations()
             }
         }
 
+        this->total_animations__loading = this->animations_names_temp.size();
+
         if(dolphin_path.at(dolphin_path.size() - 1) == '/' || dolphin_path.at(dolphin_path.size() - 1) == '\\')
             this->manifest_path = dolphin_path + "manifest.txt";
         else
