@@ -102,13 +102,13 @@ void AnimationWallet::parse_manifest()
     this->manifest = new Manifest(this->manifest_path);
     this->manifest_created = true;
 
-    if (!this->manifest->is_good) return;
+    if(!this->manifest->is_good) return;
 
-    for (Manifest_animation man_anim : this->manifest->manifest_animations)
+    for(Manifest_animation man_anim : this->manifest->manifest_animations)
     {
-        for (Animation* anim : this->animations)
+        for(Animation* anim : this->animations)
         {
-            if (anim->anim_name == man_anim.name)
+            if(anim->anim_name == man_anim.name)
             {
                 // apply animation settings from manifest.txt
                 anim->selected = true;
@@ -144,4 +144,21 @@ void AnimationWallet::load_new_animation()
     
     this->add_animation(this->animations_names_temp.at(this->number_animations_loaded).first, this->animations_names_temp.at(this->number_animations_loaded).second);
     this->number_animations_loaded+= 1;
+}
+
+void AnimationWallet::replace_weight(int new_weight)
+{
+    for(Animation* anim : this->animations)
+        // replace all weight
+        anim->weight = new_weight;
+}
+
+void AnimationWallet::replace_weight(int new_weight, int old_weight)
+{
+    for(Animation* anim : this->animations)
+    {
+        // replace if it match old_weight
+        if(anim->weight == old_weight)
+            anim->weight = new_weight;
+    }
 }

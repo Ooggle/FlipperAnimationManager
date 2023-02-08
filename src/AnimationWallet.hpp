@@ -37,6 +37,8 @@ class AnimationWallet
         bool update_manifest(std::string file_content);
         bool is_finished_loading();
         void load_new_animation();
+        void replace_weight(int new_weight);
+        void replace_weight(int new_weight, int old_weight);
 };
 
 #endif

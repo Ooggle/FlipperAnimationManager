@@ -119,6 +119,11 @@ int main(int argc, char* argv[])
     char* manifest_content_char = (char*)malloc(sizeof(char) * 1000);
     long unsigned int manifest_content_max_size = sizeof(char) * 1000;
 
+    // global variables for specific windows
+    int old_weight_replace = 7;
+    int new_weight_replace = 7;
+    int new_weight = 7;
+
     // Our state
     int window_width = 1280;
     int window_height = 720;
@@ -416,8 +421,53 @@ int main(int argc, char* argv[])
                 ImGui::MenuItem("Quit", "Alt+F4", &done);
                 ImGui::EndMenu();
             }
+            if(ImGui::BeginMenu("Tools"))
+            {
+                ImGui::MenuItem("Change weight...");
+                if(ImGui::IsItemClicked())
+                    ImGui::OpenPopup("Change weight");
+
+                bool change_weight_popup = true;
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
+                if(ImGui::BeginPopupModal("Change weight", &change_weight_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
+                {
+                    ImGui::PopStyleVar();
+
+                    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                        ImGui::CloseCurrentPopup();
+
+                    ImGui::Text("CHANGE FOR EVERY ANIMATIONS");
+                    ImGui::Text("New weight:");
+                    ImGui::SliderInt("##new_weight", &new_weight, 0, 14);
+                    if(ImGui::Button("Apply changes##apply_changes"))
+                    {
+                        animations_wallet->replace_weight(new_weight);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                    ImGui::Separator();
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                    ImGui::Text("REPLACE SPECIFIC WEIGHT");
+                    ImGui::Text("Replace:");
+                    ImGui::SliderInt("##old_weight_replace", &old_weight_replace, 0, 14);
+                    ImGui::Text("By:");
+                    ImGui::SliderInt("##new_weight_replace", &new_weight_replace, 0, 14);
+                    if(ImGui::Button("Apply changes##apply_changes_replace"))
+                    {
+                        animations_wallet->replace_weight(new_weight_replace, old_weight_replace);
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+                    ImGui::EndPopup();
+                }
+                ImGui::PopStyleVar();
+                ImGui::EndMenu();
+            }
+
             ImGui::EndMenuBar();
         }
+
         ImGui::Text("Dolphin folder:");
         if(ImGui::InputText("##dolphin_folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
         {
