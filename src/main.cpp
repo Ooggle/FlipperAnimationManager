@@ -5,9 +5,17 @@
 #include "Animation.hpp"
 #include "AnimationWallet.hpp"
 #include "Manifest.hpp"
+#include "utils/Notifications.hpp"
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
+
+// fonts
+#include "fonts/born_2_b_sporty.h"
+#include "fonts/fa_solid_900.h"
+#include "fonts/fa_brands_400.h"
+#include "fonts/IconsFontAwesome6.h"
+#include "fonts/IconsFontAwesome6Brands.h"
 
 // for system()
 #include <stdlib.h>
@@ -38,8 +46,8 @@ static void HelpMarker(const char* desc)
 int main(int argc, char* argv[])
 {
     const int version_major = 1;
-    const int version_minor = 2;
-    const int version_patch = 1;
+    const int version_minor = 3;
+    const int version_patch = 0;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -109,8 +117,22 @@ int main(int argc, char* argv[])
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontDefault();
+    static const ImWchar icons_ranges_fa[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+    static const ImWchar icons_ranges_fab[] = {ICON_MIN_FAB, ICON_MAX_FAB, 0};
+    font_cfg.MergeMode = true;
+    font_cfg.PixelSnapH = true;
+    io.Fonts->AddFontFromMemoryCompressedTTF((void*)fa_solid_900_compressed_data, fa_solid_900_compressed_size, 12.f, &font_cfg, icons_ranges_fa);
+    io.Fonts->AddFontFromMemoryCompressedTTF((void*)fa_brands_400_compressed_data, fa_brands_400_compressed_size, 12.f, &font_cfg, icons_ranges_fab);
+    font_cfg.PixelSnapH = false;
+    font_cfg.MergeMode = false;
+    ImFont* sporty_font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)born_2_b_sporty_compressed_data, born_2_b_sporty_compressed_size, 16.f, &font_cfg);
 
     imgui_addons::ImGuiFileBrowser file_dialog; // As a class member or globally
+
+    Notifications notifications;
 
     // animations size:
     const int image_width = 128;
@@ -187,7 +209,8 @@ int main(int argc, char* argv[])
                     ImGuiWindowFlags_NoSavedSettings |
                     ImGuiWindowFlags_NoCollapse |
                     ImGuiWindowFlags_NoMove |
-                    ImGuiWindowFlags_NoTitleBar
+                    ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_NoBringToFrontOnFocus
                     );
         if(animations_wallet->animations_number != 0)
         {
@@ -287,7 +310,8 @@ int main(int argc, char* argv[])
                     }
 
                     // popup modal for animation preview
-                    if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), NULL, ImGuiWindowFlags_NoResize))
+                    bool not_used_popup_modal_preview = true;
+                    if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), &not_used_popup_modal_preview, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
                     {
                         ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
                         if(ImGui::Button("Close") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
@@ -308,7 +332,7 @@ int main(int argc, char* argv[])
                             }
                             ImGui::PopStyleColor(3);
                             //ImGui::SetNextWindowSize({700, 50});
-                            if(ImGui::BeginPopupModal("exported_to_bm", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar))
+                            if(ImGui::BeginPopupModal("exported_to_bm", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar))
                             {
                                 ImGui::SetWindowFontScale(1.5f);
                                 ImGui::Text("Exported to folder:");
@@ -378,11 +402,15 @@ int main(int argc, char* argv[])
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
                 {
                     ImGui::PopStyleVar();
+                    ImGui::PushFont(sporty_font);
                     ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
+                    ImGui::PopFont();
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Text("Made with <3 by Ooggle");
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.3f, 0.3f, 0.3f, 0.2f});
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.7f, 0.4f, 0.1f, 0.3f});
+                    ImGui::Text("%s", ICON_FA_GITHUB);
+                    ImGui::SameLine();
                     ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager");
                     ImGui::PopStyleColor(2);
                     if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
@@ -436,18 +464,23 @@ int main(int argc, char* argv[])
                     if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
                         ImGui::CloseCurrentPopup();
 
+                    ImGui::PushFont(sporty_font);
                     ImGui::Text("CHANGE FOR EVERY ANIMATIONS");
+                    ImGui::PopFont();
                     ImGui::Text("New weight:");
                     ImGui::SliderInt("##new_weight", &new_weight, 0, 14);
                     if(ImGui::Button("Apply changes##apply_changes"))
                     {
                         animations_wallet->replace_weight(new_weight);
+                        notifications.add_notification(NOTIF_SUCCESS, "Success", "Weight has been changed for every animations.");
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Separator();
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                    ImGui::PushFont(sporty_font);
                     ImGui::Text("REPLACE SPECIFIC WEIGHT");
+                    ImGui::PopFont();
                     ImGui::Text("Replace:");
                     ImGui::SliderInt("##old_weight_replace", &old_weight_replace, 0, 14);
                     ImGui::Text("By:");
@@ -455,6 +488,7 @@ int main(int argc, char* argv[])
                     if(ImGui::Button("Apply changes##apply_changes_replace"))
                     {
                         animations_wallet->replace_weight(new_weight_replace, old_weight_replace);
+                        notifications.add_notification(NOTIF_SUCCESS, "Success", "Weight has been replaced for selected animations.");
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -468,7 +502,9 @@ int main(int argc, char* argv[])
             ImGui::EndMenuBar();
         }
 
-        ImGui::Text("Dolphin folder:");
+        ImGui::PushFont(sporty_font);
+        ImGui::Text("Dolphin folder");
+        ImGui::PopFont();
         if(ImGui::InputText("##dolphin_folder", current_animations_folder, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
         {
             animation_wallet_loaded = false;
@@ -570,7 +606,9 @@ int main(int argc, char* argv[])
             ImGui::Separator();
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
+            ImGui::PushFont(sporty_font);
             ImGui::Text("Manifest.txt");
+            ImGui::PopFont();
             if(strcmp(manifest_content_char, manifest_content.c_str()))
             {
                 // Not very pretty but it will remain like that until I found something better without abusing (re)allocations
@@ -586,18 +624,18 @@ int main(int argc, char* argv[])
             {
                 if(animations_wallet->update_manifest(manifest_content))
                 {
-                    // TODO: show saved success message
+                    notifications.add_notification(NOTIF_SUCCESS, "Success", "manifest.txt successfully updated.");
                 }
                 else
                 {
-                    // TODO: show failure message
+                    notifications.add_notification(NOTIF_SUCCESS, "Error", "Error while updating manifest.txt.");
                 }
             }
             ImGui::SameLine();
             if(ImGui::Button("Copy to clipboard"))
             {
                 ImGui::SetClipboardText(manifest_content_char);
-                // TODO: show copied to clipboard message
+                notifications.add_notification(NOTIF_SUCCESS, "Success", "Manifest copied to clipboard.");
             }
         }
         ImGui::End();
@@ -621,6 +659,8 @@ int main(int argc, char* argv[])
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
+
+        notifications.display_notifications(window_width, window_height);
 
         // Rendering
         ImGui::Render();

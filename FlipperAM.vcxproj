@@ -90,7 +90,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\utils;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -104,7 +104,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;D:\GL\SDL2-2.26.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\utils;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;D:\GL\SDL2-2.26.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -121,7 +121,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\utils;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
@@ -141,7 +141,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;D:\GL\SDL2-2.26.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>lib\;lib\imgui;lib\imgui\backends;src\utils;src\file_browser;src\file_browser\Dirent;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;D:\GL\SDL2-2.26.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -165,6 +165,7 @@
     <ClCompile Include="lib\imgui\backends\imgui_impl_opengl2.cpp" />
     <ClCompile Include="lib\imgui\backends\imgui_impl_sdl.cpp" />
     <ClCompile Include="src\heatshrink_decoder.c" />
+    <ClCompile Include="src\\utils\Notifications.cpp" />
     <ClCompile Include="src\\file_browser\ImGuiFileBrowser.cpp" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationWallet.cpp" />
