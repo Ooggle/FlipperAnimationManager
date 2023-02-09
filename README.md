@@ -11,6 +11,7 @@
 <p align="center">
     <img alt="img last release" src="https://img.shields.io/github/release/Ooggle/FlipperAnimationManager.svg?color=blue">
     <img alt="img last commit" src="https://img.shields.io/github/last-commit/Ooggle/FlipperAnimationManager.svg">
+    <a href="https://github.com/Ooggle/FlipperAnimationManager/wiki"><img src="https://img.shields.io/badge/wiki-documentation-forestgreen"></a>
     <a href="https://twitter.com/intent/follow?screen_name=Ooggle_" title="Follow"><img src="https://img.shields.io/twitter/follow/Ooggle_?label=Ooggle_&style=social"></a>
 </p>
 
@@ -33,7 +34,7 @@
 
 # Usage
 
-Detailed guide coming soon...
+<hp><a href="https://github.com/Ooggle/FlipperAnimationManager/wiki/Usage-Guide">See wiki for basic usage guide<a></p>
 
 <br>
 
