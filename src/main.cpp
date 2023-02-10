@@ -402,41 +402,66 @@ int main(int argc, char* argv[])
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
                 {
                     ImGui::PopStyleVar();
-                    ImGui::PushFont(sporty_font);
-                    ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
-                    ImGui::PopFont();
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-                    ImGui::Text("Made with <3 by Ooggle");
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.3f, 0.3f, 0.3f, 0.2f});
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.7f, 0.4f, 0.1f, 0.3f});
-                    ImGui::Text("%s", ICON_FA_GITHUB);
-                    ImGui::SameLine();
-                    ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager");
-                    ImGui::PopStyleColor(2);
-                    if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
-                    {
-                        ImGui::BeginTooltip();
-                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                        ImGui::TextUnformatted("Open link");
-                        ImGui::PopTextWrapPos();
-                        ImGui::EndTooltip();
-                    }
-                    if(ImGui::IsItemClicked())
-                    {
-                        std::string github_link = "https://github.com/Ooggle/FlipperAnimationManager";
 
-                        #ifdef _WIN32
-                        ShellExecuteA(NULL, "open", github_link.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-                        #else
-                        #if __APPLE__
-                        std::string command_macos = std::string("open \"") + github_link.c_str() + std::string("\"");
-                        system(command_macos.c_str());
-                        #else
-                        std::string command_linux = std::string("xdg-open \"") + github_link.c_str() + std::string("\"");
-                        system(command_linux.c_str());
-                        #endif
-                        #endif
+                    if(ImGui::BeginTabBar("about_tab_bar", ImGuiTabBarFlags_None))
+                    {
+                        if(ImGui::BeginTabItem("About"))
+                        {
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.f);
+                            ImGui::PushFont(sporty_font);
+                            ImGui::Text("Flipper-Zero Animation Manager v%d.%d.%d", version_major, version_minor, version_patch);
+                            ImGui::PopFont();
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                            ImGui::Text("Made with <3 by Ooggle");
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.3f, 0.3f, 0.3f, 0.2f});
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.7f, 0.4f, 0.1f, 0.3f});
+                            ImGui::Text("%s", ICON_FA_GITHUB);
+                            ImGui::SameLine();
+                            ImGui::Button("https://github.com/Ooggle/FlipperAnimationManager");
+                            ImGui::PopStyleColor(2);
+                            if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                            {
+                                ImGui::BeginTooltip();
+                                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                                ImGui::TextUnformatted("Open link");
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
+                            }
+                            if(ImGui::IsItemClicked())
+                            {
+                                std::string github_link = "https://github.com/Ooggle/FlipperAnimationManager";
+
+                                #ifdef _WIN32
+                                ShellExecuteA(NULL, "open", github_link.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+                                #else
+                                #if __APPLE__
+                                std::string command_macos = std::string("open \"") + github_link.c_str() + std::string("\"");
+                                system(command_macos.c_str());
+                                #else
+                                std::string command_linux = std::string("xdg-open \"") + github_link.c_str() + std::string("\"");
+                                system(command_linux.c_str());
+                                #endif
+                                #endif
+                            }
+                            ImGui::EndTabItem();
+                        }
+                        if(ImGui::BeginTabItem("Tips"))
+                        {
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.f);
+                            ImGui::PushFont(sporty_font);
+                            ImGui::Text("Various tips");
+                            ImGui::PopFont();
+                            ImGui::TextWrapped("- You can close almost all popups by pressing the Escape key");
+                            ImGui::TextWrapped("- Keyboard navigation is possible with 'ctrl + tab' and arrow keys");
+                            ImGui::TextWrapped("- You can start the program with a pre-choose folder by passing it as command line argument");
+                            ImGui::TextWrapped("... And thank you for using the Animation Manager!");
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
                     }
+
+
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                     ImGui::Separator();
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
@@ -529,19 +554,22 @@ int main(int argc, char* argv[])
         {
             ImGui::OpenPopup("Loading animations popup");
         }
-        ImGui::SetNextWindowSize({700, 50});
-        if(ImGui::BeginPopupModal("Loading animations popup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar))
+        ImGui::SetNextWindowSize({700, 70});
+        if(ImGui::BeginPopupModal("Loading animations popup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar))
         {
             if(animation_wallet_loaded)
                 ImGui::CloseCurrentPopup();
-            ImGui::SetWindowFontScale(2.f);
-            std::string load_text = "Loading animations... " + std::to_string(animations_wallet->animations_number) + std::string("/") + std::to_string(animations_wallet->total_animations__loading);
+            ImGui::SetWindowFontScale(1.5f);
+            std::string load_text = "Loading " + std::to_string(animations_wallet->total_animations__loading) + " animations... ";
 
             float windowWidth = ImGui::GetWindowSize().x;
             float textWidth = ImGui::CalcTextSize(load_text.c_str()).x;
 
             ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
             ImGui::Text("%s", load_text.c_str());
+            char buf[32];
+            sprintf(buf, "%d/%d", animations_wallet->animations_number, animations_wallet->total_animations__loading);
+            ImGui::ProgressBar((float)animations_wallet->animations_number / animations_wallet->total_animations__loading, ImVec2(-FLT_MIN, 0.f), buf);
 
             ImGui::SetWindowFontScale(default_font_size);
             ImGui::EndPopup();
@@ -628,7 +656,7 @@ int main(int argc, char* argv[])
                 }
                 else
                 {
-                    notifications.add_notification(NOTIF_SUCCESS, "Error", "Error while updating manifest.txt.");
+                    notifications.add_notification(NOTIF_ERROR, "Error", "Error while updating manifest.txt.");
                 }
             }
             ImGui::SameLine();
