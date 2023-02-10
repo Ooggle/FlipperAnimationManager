@@ -21,11 +21,11 @@ void Notifications::display_notifications(int window_width, int window_height)
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 230.f / 255.f));
     int notif_offset = 40;
     int notif_number = 0;
+    auto end = std::chrono::system_clock::now();
 
     for(notification notif: this->notifications)
     {
         // if expired
-        auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - notif.date_created;
         if(elapsed_seconds.count() > NOTIFICATIONS_DURATION)
         {

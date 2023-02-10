@@ -39,6 +39,8 @@ class AnimationWallet
         void load_new_animation();
         void replace_weight(int new_weight);
         void replace_weight(int new_weight, int old_weight);
+        void replace_min_max_level(int new_min_level, int new_max_level);
+        void replace_min_max_butthurt(int new_min_butthurt, int new_max_butthurt);
 };
 
 #endif

@@ -142,9 +142,16 @@ int main(int argc, char* argv[])
     long unsigned int manifest_content_max_size = sizeof(char) * 1000;
 
     // global variables for specific windows
+    // weight window
     int old_weight_replace = 7;
     int new_weight_replace = 7;
     int new_weight = 7;
+    // level window
+    int new_min_level = 0;
+    int new_max_level = 30;
+    // butthurt window
+    int new_min_butthurt = 0;
+    int new_max_butthurt = 14;
 
     // Our state
     int window_width = 1280;
@@ -345,6 +352,21 @@ int main(int argc, char* argv[])
                         }
                         ImGui::SameLine();
                         ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                        ImGui::Separator();
+                        // level sliders
+                        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.385f);
+                        ImGui::SliderInt("Min level", &animations_wallet->animations.at(current_anim)->min_level, 0, animations_wallet->animations.at(current_anim)->max_level);
+                        ImGui::SameLine();
+                        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.385f);
+                        ImGui::SliderInt("Max level", &animations_wallet->animations.at(current_anim)->max_level, animations_wallet->animations.at(current_anim)->min_level, 30);
+                        ImGui::Separator();
+                        // butthurt sliders
+                        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.35f);
+                        ImGui::SliderInt("Min butthurt", &animations_wallet->animations.at(current_anim)->min_butthurt, 0, animations_wallet->animations.at(current_anim)->max_butthurt);
+                        ImGui::SameLine();
+                        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.35f);
+                        ImGui::SliderInt("Max butthurt", &animations_wallet->animations.at(current_anim)->max_butthurt, animations_wallet->animations.at(current_anim)->min_butthurt, 14);
+
                         ImGui::EndPopup();
                     }
                     if(animations_wallet->animations.at(current_anim)->selected)
@@ -399,6 +421,7 @@ int main(int argc, char* argv[])
                     ImGui::OpenPopup("About");
                 
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+                ImGui::SetNextWindowSize(ImVec2(500, 350));
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
                 {
                     ImGui::PopStyleVar();
@@ -451,10 +474,16 @@ int main(int argc, char* argv[])
                             ImGui::PushFont(sporty_font);
                             ImGui::Text("Various tips");
                             ImGui::PopFont();
-                            ImGui::TextWrapped("- You can close almost all popups by pressing the Escape key");
+                            ImGui::TextWrapped("- You can close almost all popups by pressing the Escape key (this one too!)");
                             ImGui::TextWrapped("- Keyboard navigation is possible with 'ctrl + tab' and arrow keys");
+                            ImGui::TextWrapped("- It is recommended to run the program on your graphic card for blazing fast performance!");
                             ImGui::TextWrapped("- You can start the program with a pre-choose folder by passing it as command line argument");
+                            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5.f);
+                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 201, 40, 255));
                             ImGui::TextWrapped("... And thank you for using the Animation Manager!");
+                            ImGui::PopStyleColor();
+                            ImGui::SameLine();
+                            ImGui::TextColored({255, 0, 0, 255}, ICON_FA_HEART);
                             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
                             ImGui::EndTabItem();
                         }
@@ -479,6 +508,14 @@ int main(int argc, char* argv[])
                 ImGui::MenuItem("Change weight...");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("Change weight");
+
+                ImGui::MenuItem("Change level...");
+                if(ImGui::IsItemClicked())
+                    ImGui::OpenPopup("Change level");
+                    
+                ImGui::MenuItem("Change butthurt...");
+                if(ImGui::IsItemClicked())
+                    ImGui::OpenPopup("Change butthurt");
 
                 bool change_weight_popup = true;
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
@@ -521,6 +558,79 @@ int main(int argc, char* argv[])
                     ImGui::EndPopup();
                 }
                 ImGui::PopStyleVar();
+
+                bool change_level_popup = true;
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
+                if(ImGui::BeginPopupModal("Change level", &change_level_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
+                {
+                    ImGui::PopStyleVar();
+
+                    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                        ImGui::CloseCurrentPopup();
+
+                    ImGui::PushFont(sporty_font);
+                    ImGui::Text("CHANGE FOR EVERY ANIMATIONS");
+                    ImGui::PopFont();
+                    ImGui::Text("New min level:");
+                    ImGui::SliderInt("##new_min_level", &new_min_level, 0, 30);
+                    ImGui::Text("New max level:");
+                    ImGui::SliderInt("##new_max_level", &new_max_level, 0, 30);
+                    if(ImGui::Button("Apply changes##apply_changes"))
+                    {
+                        if(new_min_level > new_max_level)
+                        {
+                            notifications.add_notification(NOTIF_ERROR, "Error", "Min level can't be greater than max level!");
+                            ImGui::CloseCurrentPopup();
+                        }
+                        else
+                        {
+                            animations_wallet->replace_min_max_level(new_min_level, new_max_level);
+                            notifications.add_notification(NOTIF_SUCCESS, "Success", "Min and max level has been changed for every animations.");
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+                    ImGui::EndPopup();
+                }
+                ImGui::PopStyleVar();
+
+                bool change_butthurt_popup = true;
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
+                if(ImGui::BeginPopupModal("Change butthurt", &change_butthurt_popup, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
+                {
+                    ImGui::PopStyleVar();
+
+                    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
+                        ImGui::CloseCurrentPopup();
+
+                    ImGui::PushFont(sporty_font);
+                    ImGui::Text("CHANGE FOR EVERY ANIMATIONS");
+                    ImGui::PopFont();
+                    ImGui::Text("New min butthurt:");
+                    ImGui::SliderInt("##new_min_butthurt", &new_min_butthurt, 0, 14);
+                    ImGui::Text("New max butthurt:");
+                    ImGui::SliderInt("##new_max_butthurt", &new_max_butthurt, 0, 14);
+                    if(ImGui::Button("Apply changes##apply_changes"))
+                    {
+                        if(new_min_butthurt > new_max_butthurt)
+                        {
+                            notifications.add_notification(NOTIF_ERROR, "Error", "Min butthurt can't be greater than max butthurt!");
+                            ImGui::CloseCurrentPopup();
+                        }
+                        else
+                        {
+                            animations_wallet->replace_min_max_butthurt(new_min_butthurt, new_max_butthurt);
+                            notifications.add_notification(NOTIF_SUCCESS, "Success", "Min and max butthurt has been changed for every animations.");
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+                    ImGui::EndPopup();
+                }
+                ImGui::PopStyleVar();
+
                 ImGui::EndMenu();
             }
 

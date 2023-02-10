@@ -162,3 +162,21 @@ void AnimationWallet::replace_weight(int new_weight, int old_weight)
             anim->weight = new_weight;
     }
 }
+
+void AnimationWallet::replace_min_max_level(int new_min_level, int new_max_level)
+{
+    for(Animation* anim : this->animations)
+    {
+        anim->min_level = new_min_level;
+        anim->max_level = new_max_level;
+    }
+}
+
+void AnimationWallet::replace_min_max_butthurt(int new_min_butthurt, int new_max_butthurt)
+{
+    for(Animation* anim : this->animations)
+    {
+        anim->min_butthurt = new_min_butthurt;
+        anim->max_butthurt = new_max_butthurt;
+    }
+}
