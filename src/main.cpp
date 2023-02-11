@@ -70,19 +70,21 @@ int main(int argc, char* argv[])
     SDL_SetWindowMinimumSize(window, 1280, 720);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    char default_animation_folder[] = "./dolphin/";
-    char current_animations_folder[1024];
+    AnimationWallet* animations_wallet;
+
+    char current_animations_folder[1024] = {0};
     if(argc > 1)
     {
         if(strlen(argv[1]) <= 1024)
+        {
             strcpy(current_animations_folder, argv[1]);
+            animations_wallet = new AnimationWallet(current_animations_folder);
+        }
         else
-            strcpy(current_animations_folder, default_animation_folder);
+            animations_wallet = new AnimationWallet();
     }
     else
-        strcpy(current_animations_folder, default_animation_folder);
-
-    AnimationWallet* animations_wallet = new AnimationWallet(current_animations_folder);
+        animations_wallet = new AnimationWallet();
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -219,7 +221,7 @@ int main(int argc, char* argv[])
                     ImGuiWindowFlags_NoTitleBar |
                     ImGuiWindowFlags_NoBringToFrontOnFocus
                     );
-        if(animations_wallet->animations_number != 0)
+        if(animations_wallet->animations_number != 0 && !animations_wallet->not_initialized)
         {
             if(!theater_mode)
             {
@@ -394,7 +396,10 @@ int main(int argc, char* argv[])
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ((window_height - 100) / 2));
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 70.f + ((window_width - 850) / 2));
             ImGui::SetWindowFontScale(2.f);
-            ImGui::Text("No animation found in selected folder.");
+            if(animations_wallet->not_initialized)
+                ImGui::Text("Please select a folder.");
+            else
+                ImGui::Text("No animation found in selected folder.");
             ImGui::SetWindowFontScale(default_font_size);
         }
         ImGui::End();
@@ -699,18 +704,21 @@ int main(int argc, char* argv[])
             delete(animations_wallet);
             animations_wallet = new AnimationWallet(current_animations_folder);
         }
-        ImGui::SameLine();
         if(animations_wallet->get_is_folder_correct())
-            ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.00f), "Success, %d animations loaded", animations_wallet->animations_number);
-        else
         {
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.00f), "Success, %d animations loaded", animations_wallet->animations_number);
+        }
+        else if(!animations_wallet->not_initialized)
+        {
+            ImGui::SameLine();
             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.00f), "Failed, folder not found");
             ImGui::SameLine();
             HelpMarker("The path can be either a relative path from the program location or a absolute (full) path to the dolphin folder which contains compiled animations (with .bm or .png files)\n\nExample of paths:\nWindows: C:\\Users\\user\\dolphin\\\nLinux/MacOS: /path/to/dolphin/folder/");
         }
 
         // show animations errors if necessary
-        if(animations_wallet->errored_animations.size() > 0)
+        if(animations_wallet->errored_animations.size() > 0 && !animations_wallet->not_initialized)
         {
             std::string btn_errors_string = std::to_string(animations_wallet->errored_animations.size()) + ((animations_wallet->errored_animations.size() == 1) ? std::string(" error") : std::string(" errors!"));
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.3f, 0.4f, 1.0f});

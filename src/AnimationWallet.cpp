@@ -1,8 +1,14 @@
 #include "AnimationWallet.hpp"
 
+AnimationWallet::AnimationWallet()
+{
+    this->not_initialized = true;
+}
+
 AnimationWallet::AnimationWallet(std::string dolphin_path)
 {
     this->dolphin_path = dolphin_path;
+    this->not_initialized = false;
     this->load_animations();
 }
 

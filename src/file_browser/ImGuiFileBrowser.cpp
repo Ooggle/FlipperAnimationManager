@@ -544,7 +544,7 @@ namespace imgui_addons
         ImGui::SameLine();
         ImGui::SetCursorPosX(buttons_xpos);
         //Render Cancel Button
-        if (ImGui::Button("Cancel", ImVec2(button_width, 0)))
+        if(ImGui::Button("Cancel", ImVec2(button_width, 0)) || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
             closeDialog();
         ImGui::SameLine();
         if(dialog_mode == DialogMode::SAVE)

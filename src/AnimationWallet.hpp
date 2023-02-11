@@ -13,6 +13,7 @@ namespace fs = std::filesystem;
 class AnimationWallet
 {
     public:
+        bool not_initialized = false;
         int animations_number = 0;
         int total_animations__loading = 0;
         std::vector<Animation*> animations;
@@ -28,7 +29,8 @@ class AnimationWallet
         std::vector<std::pair<std::string, std::string>> animations_names_temp;
 
     public:
-        AnimationWallet(std::string dolphin_path = std::string(""));
+        AnimationWallet();
+        AnimationWallet(std::string dolphin_path);
         ~AnimationWallet();
         void load_animations();
         void add_animation(std::string anim_folder, std::string anim_name);
