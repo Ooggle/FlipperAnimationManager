@@ -115,7 +115,7 @@ Animation::~Animation()
 void Animation::next_frame()
 {
     this->current_frame_number+= 1;
-    if(this->current_frame_number >= this->total_frames_files)
+    if(this->current_frame_number >= this->frames_order.size())
     {
         this->current_frame_number = 0;
     }
