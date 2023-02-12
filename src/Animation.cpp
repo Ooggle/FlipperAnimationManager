@@ -115,7 +115,7 @@ Animation::~Animation()
 void Animation::next_frame()
 {
     this->current_frame_number+= 1;
-    if(this->current_frame_number >= this->frames_order.size())
+    if(this->current_frame_number >= (int)this->frames_order.size())
     {
         this->current_frame_number = 0;
     }
@@ -147,8 +147,8 @@ bool Animation::read_frames_from_files()
 
     // if a good format is found, proceed to load the files into textures
     this->frames = (GLuint*)malloc(this->total_frames_files * sizeof(GLuint));
-    this->frames_pixels = (unsigned char**)malloc(this->total_frames_files * sizeof(unsigned char*));
-    memset(this->frames_pixels, 0, this->total_frames_files * sizeof(unsigned char*));
+    this->frames_pixels = (uint8_t**)malloc(this->total_frames_files * sizeof(uint8_t*));
+    memset(this->frames_pixels, 0, this->total_frames_files * sizeof(uint8_t*));
     for(int i = 0; i < this->total_frames_files; i++)
     {
         if(!this->LoadImageFromFile(this->anim_folder + "frame_" + std::to_string(i), i))
@@ -163,7 +163,7 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
     // Image dimensions
     int image_width = 128;
     int image_height = 64;
-    unsigned char* image_data = NULL;
+    uint8_t* image_data = NULL;
 
     if(this->format == BM)
     {
@@ -178,12 +178,12 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
         fseek(f, 0, SEEK_END);
         int len = ftell(f);
         fseek(f, 0, SEEK_SET);
-        unsigned char* buffer = (unsigned char*)malloc(len+1);
-        unsigned char* out_buff = (unsigned char*)malloc(1024);
+        uint8_t* buffer = (uint8_t*)malloc(len+1);
+        uint8_t* out_buff = (uint8_t*)malloc(1024);
         fread(buffer, sizeof(char), len, f);
         fclose(f);
 
-        unsigned char* good_buffer = NULL;
+        uint8_t* good_buffer = NULL;
         if(buffer[0] == 1)
         {
             // Decompress using lzss heatshrink lib
@@ -202,7 +202,7 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
             heatshrink_decoder_finish(decoder);
             heatshrink_decoder_free(decoder);
 
-            image_data = (unsigned char*)malloc((1024*8)*4);
+            image_data = (uint8_t*)malloc((1024*8)*4);
             int pos = 0;
             // 1024: (128*64) / 8
             int count_bytes = (image_width * image_height) / 8;
@@ -239,7 +239,7 @@ bool Animation::LoadImageFromFile(std::string filename, int file_number)
         {
             good_buffer = buffer + 1;
 
-            image_data = (unsigned char*)malloc((1024*8)*4);
+            image_data = (uint8_t*)malloc((1024*8)*4);
             int pos = 0;
             for(int i = 0; i < 1024; i++)
             {
@@ -354,6 +354,8 @@ void Animation::export_to_bm()
 
     std::string export_path = this->anim_folder.substr(0, this->anim_folder.length() - 1) + std::string("_compiled");
     std::filesystem::create_directory(export_path);
+    if(std::filesystem::exists(export_path + std::string("/meta.txt")))
+        std::filesystem::remove(export_path + std::string("/meta.txt"));
     std::filesystem::copy_file(this->anim_folder + std::string("meta.txt"), export_path + std::string("/meta.txt"));
 
     int image_width = 128;
@@ -361,13 +363,13 @@ void Animation::export_to_bm()
 
     for(int f = 0; f < this->total_frames_files; f++)
     {
-        unsigned char* bm_frame = (unsigned char*)malloc(((image_width * image_height) / 8) + 1);
+        uint8_t* bm_frame = (uint8_t*)malloc(((image_width * image_height) / 8) + 1);
         bm_frame[0] = 0;
         int bm_frame_pos = 1;
 
         int L, P;
         int pixel_pos = 0;
-        unsigned char byte_buffer = 0;
+        uint8_t byte_buffer = 0;
         int byte_buffer_count = 0;
         int count_bytes = (image_width * image_height) * 4;
         for(pixel_pos = 0; pixel_pos < count_bytes; pixel_pos+= 4)
@@ -397,8 +399,9 @@ void Animation::export_to_bm()
                 byte_buffer_count = 0;
             }
         }
+        printf("\n");
         std::ofstream manifest_file;
-        manifest_file.open((export_path + std::string("/frame_") + std::to_string(f) + std::string(".bm")).c_str(), std::ofstream::out | std::ofstream::trunc);
+        manifest_file.open((export_path + std::string("/frame_") + std::to_string(f) + std::string(".bm")).c_str(), std::ofstream::trunc | std::ofstream::binary);
 
         if(!manifest_file.is_open()) {
             perror("Error: open frame");

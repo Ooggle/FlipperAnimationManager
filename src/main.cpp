@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 {
     const int version_major = 1;
     const int version_minor = 3;
-    const int version_patch = 0;
+    const int version_patch = 1;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
