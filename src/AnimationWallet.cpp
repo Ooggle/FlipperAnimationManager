@@ -5,14 +5,14 @@ AnimationWallet::AnimationWallet()
     this->not_initialized = true;
 }
 
-AnimationWallet::AnimationWallet(std::string dolphin_path)
+AnimationWallet::AnimationWallet(std::string dolphin_path, bool sort_anims)
 {
     this->dolphin_path = dolphin_path;
     this->not_initialized = false;
-    this->load_animations();
+    this->load_animations(sort_anims);
 }
 
-void AnimationWallet::load_animations()
+void AnimationWallet::load_animations(bool sort_anims)
 {
     std::string dolphin_path = this->dolphin_path;
 
@@ -67,6 +67,9 @@ void AnimationWallet::load_animations()
                 }
             }
         }
+
+        if (sort_anims)
+            std::sort(this->animations_names_temp.begin(), this->animations_names_temp.end());
 
         this->total_animations__loading = this->animations_names_temp.size();
 

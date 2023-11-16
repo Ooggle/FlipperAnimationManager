@@ -70,6 +70,8 @@ int main(int argc, char* argv[])
     SDL_SetWindowMinimumSize(window, 1280, 720);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
+    bool sort_anims = false;
+
     AnimationWallet* animations_wallet;
 
     char current_animations_folder[1024] = {0};
@@ -78,7 +80,7 @@ int main(int argc, char* argv[])
         if(strlen(argv[1]) <= 1024)
         {
             strcpy(current_animations_folder, argv[1]);
-            animations_wallet = new AnimationWallet(current_animations_folder);
+            animations_wallet = new AnimationWallet(current_animations_folder, sort_anims);
         }
         else
             animations_wallet = new AnimationWallet();
@@ -421,10 +423,17 @@ int main(int argc, char* argv[])
             {
                 ImGui::Checkbox("Minimal UI Mode", &theater_mode);
 
+                if(ImGui::Checkbox("Sort animations", &sort_anims))
+                {
+                    animation_wallet_loaded = false;
+                    delete(animations_wallet);
+                    animations_wallet = new AnimationWallet(current_animations_folder, sort_anims);
+                }
+
                 ImGui::MenuItem("About");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("About");
-                
+
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
                 ImGui::SetNextWindowSize(ImVec2(500, 350));
                 if(ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_NoResize))
@@ -649,7 +658,7 @@ int main(int argc, char* argv[])
         {
             animation_wallet_loaded = false;
             delete(animations_wallet);
-            animations_wallet = new AnimationWallet(current_animations_folder);
+            animations_wallet = new AnimationWallet(current_animations_folder, sort_anims);
         }
         if(!animation_wallet_loaded)
         {
@@ -689,20 +698,20 @@ int main(int argc, char* argv[])
             ImGui::SetWindowFontScale(default_font_size);
             ImGui::EndPopup();
         }
-            
+
         if(file_dialog.showFileDialog("Select Folder", imgui_addons::ImGuiFileBrowser::DialogMode::SELECT, ImVec2(700, 510)))
         {
             animation_wallet_loaded = false;
             strcpy(current_animations_folder, file_dialog.selected_path.c_str());
             delete(animations_wallet);
-            animations_wallet = new AnimationWallet(current_animations_folder);
+            animations_wallet = new AnimationWallet(current_animations_folder, sort_anims);
         }
 
         if(ImGui::Button("Load"))
         {
             animation_wallet_loaded = false;
             delete(animations_wallet);
-            animations_wallet = new AnimationWallet(current_animations_folder);
+            animations_wallet = new AnimationWallet(current_animations_folder, sort_anims);
         }
         if(animations_wallet->get_is_folder_correct())
         {
