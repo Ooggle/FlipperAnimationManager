@@ -30,9 +30,9 @@ class AnimationWallet
 
     public:
         AnimationWallet();
-        AnimationWallet(std::string dolphin_path);
+        AnimationWallet(std::string dolphin_path, bool sort_anims);
         ~AnimationWallet();
-        void load_animations();
+        void load_animations(bool sort_anims);
         void add_animation(std::string anim_folder, std::string anim_name);
         void parse_manifest();
         bool get_is_folder_correct();
