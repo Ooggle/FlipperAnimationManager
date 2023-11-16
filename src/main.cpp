@@ -320,6 +320,7 @@ int main(int argc, char* argv[])
 
                     // popup modal for animation preview
                     bool not_used_popup_modal_preview = true;
+                    bool active_frames = animations_wallet->animations.at(current_anim)->active;
                     if(ImGui::BeginPopupModal(animations_wallet->animations.at(current_anim)->anim_name.c_str(), &not_used_popup_modal_preview, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar))
                     {
                         ImGui::Image((void*)(intptr_t)animations_wallet->animations.at(current_anim)->get_frame(), ImVec2(image_width*7.f, image_height*7.f));
@@ -353,7 +354,14 @@ int main(int argc, char* argv[])
                             }
                         }
                         ImGui::SameLine();
-                        ImGui::Text("Frame %d/%d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_files());
+                        ImGui::Text("Frame %03d/%03d", animations_wallet->animations.at(current_anim)->get_current_frame_number() + 1, animations_wallet->animations.at(current_anim)->get_total_frames_number());
+                        ImGui::SameLine();
+                        if(ImGui::Checkbox("Active frames", &active_frames)) {
+                            if (active_frames)
+                                animations_wallet->animations.at(current_anim)->active = true;
+                            else
+                                animations_wallet->animations.at(current_anim)->active = false;
+                        }
                         ImGui::Separator();
                         // level sliders
                         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.385f);
@@ -517,10 +525,20 @@ int main(int argc, char* argv[])
                 ImGui::MenuItem("Change level...");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("Change level");
-                    
+
                 ImGui::MenuItem("Change butthurt...");
                 if(ImGui::IsItemClicked())
                     ImGui::OpenPopup("Change butthurt");
+                ImGui::MenuItem("Show only passive frames...");
+                if(ImGui::IsItemClicked()) {
+                    animations_wallet->set_active(false);
+                    notifications.add_notification(NOTIF_SUCCESS, "Success", "Show only passive frames for every animations.");
+                }
+                ImGui::MenuItem("Show active frames...");
+                if(ImGui::IsItemClicked()) {
+                    animations_wallet->set_active(true);
+                    notifications.add_notification(NOTIF_SUCCESS, "Success", "Show active frames for every animations.");
+                }
 
                 bool change_weight_popup = true;
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));

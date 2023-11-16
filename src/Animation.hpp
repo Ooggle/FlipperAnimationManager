@@ -24,7 +24,6 @@ class Animation
     private:
         bool valid_animation = false;
         int current_frame_number = 0;
-        int total_frames_number = 0;
         int total_frames_files = 0;
         GLuint* frames = NULL;
         uint8_t** frames_pixels = NULL;
@@ -32,8 +31,12 @@ class Animation
         std::vector<int> frames_order;
         std::chrono::system_clock::time_point time_at_last_frame;
 
+        uint passive_frames = 0;
+        uint active_frames = 0;
+
     public:
         bool selected = false;
+        bool active = false;
 
         int min_butthurt = 0;
         int max_butthurt = 14;

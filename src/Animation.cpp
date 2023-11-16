@@ -20,7 +20,6 @@ void Animation::load_animation()
     std::string line;
     std::ifstream meta_file;
     this->current_frame_number = 0;
-    this->total_frames_number = 0;
     this->total_frames_files = 0;
     this->time_at_last_frame = std::chrono::system_clock::now();
     meta_file.open((this->anim_folder + std::string("meta.txt")).c_str());
@@ -54,11 +53,11 @@ void Animation::load_animation()
         {
             try
             {
-                std::string raw_frames_order((line.substr(13, line.length() - 13)).c_str());
+                std::string raw_frames_order((line.substr(14, line.length() - 14)).c_str());
 
                 size_t start;
                 size_t end = 0;
-            
+
                 while((start = raw_frames_order.find_first_not_of(' ', end)) != std::string::npos)
                 {
                     end = raw_frames_order.find(' ', start);
@@ -77,10 +76,37 @@ void Animation::load_animation()
             }
             catch(const std::exception& e) {}
         }
+
+        // Passive frames
+        found = line.find("Passive frames: ");
+        if (found != std::string::npos)
+        {
+            try
+            {
+                this->passive_frames = std::stoi(line.substr(16, line.length() - 16).c_str());
+            }
+            catch(const std::exception& e) {}
+        }
+
+        // Active frames
+        found = line.find("Active frames: ");
+        if (found != std::string::npos)
+        {
+            try
+            {
+                this->active_frames = std::stoi(line.substr(15, line.length() - 15).c_str());
+            }
+            catch(const std::exception& e) {}
+        }
+    }
+
+    // Check frames order = passive + active frames
+    if (this->frames_order.size() != this->passive_frames + this->active_frames) {
+        fprintf(stderr, "Warning: Animation `%s` frames order size(%d) is different than passive(%d) + active(%d) frames!\n", this->anim_name.c_str(), (int)this->frames_order.size(), this->passive_frames, this->active_frames);
     }
 
     meta_file.close();
-    
+
     if(total_frames_ok && time_per_frame_ok && frames_ok)
         this->valid_animation = 1;
     else
@@ -114,11 +140,9 @@ Animation::~Animation()
 
 void Animation::next_frame()
 {
-    this->current_frame_number+= 1;
-    if(this->current_frame_number >= (int)this->frames_order.size())
-    {
+    this->current_frame_number += 1;
+    if((this->active && this->current_frame_number >= (int)this->passive_frames + (int)this->active_frames) || (!this->active && this->current_frame_number >= (int)this->passive_frames))
         this->current_frame_number = 0;
-    }
 }
 
 bool Animation::read_frames_from_files()
@@ -334,7 +358,10 @@ int Animation::get_current_frame_number()
 
 int Animation::get_total_frames_number()
 {
-    return this->total_frames_number;
+    if (this->active)
+        return this->passive_frames + this->active_frames;
+    else
+        return this->passive_frames;
 }
 
 int Animation::get_total_frames_files()
