@@ -186,3 +186,9 @@ void AnimationWallet::replace_min_max_butthurt(int new_min_butthurt, int new_max
         anim->max_butthurt = new_max_butthurt;
     }
 }
+
+void AnimationWallet::set_active(bool active)
+{
+    for(Animation* anim : this->animations)
+        anim->active = active;
+}
